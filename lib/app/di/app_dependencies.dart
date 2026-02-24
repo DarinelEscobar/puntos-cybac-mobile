@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../core/config/app_constants.dart';
 import '../../core/network/api_client.dart';
 import '../../features/auth/application/use_cases/consume_magic_link_use_case.dart';
@@ -24,7 +25,15 @@ class AppDependencies {
   final DeepLinkService deepLinkService;
 
   factory AppDependencies.create() {
-    final apiClient = ApiClient(baseUrl: AppConstants.apiBaseUrl);
+    final apiBaseUrl = AppConstants.apiBaseUrl;
+    if (apiBaseUrl.isEmpty) {
+      throw ArgumentError('API_BASE_URL is not set.');
+    }
+    if (kReleaseMode && !apiBaseUrl.startsWith('https://')) {
+      throw ArgumentError('API_BASE_URL must use HTTPS in release mode.');
+    }
+
+    final apiClient = ApiClient(baseUrl: apiBaseUrl);
     final authService = MagicLinkAuthService(apiClient);
     final cardsService = ClientCardsService(apiClient);
     final consumeMagicLinkUseCase = ConsumeMagicLinkUseCase(authService);

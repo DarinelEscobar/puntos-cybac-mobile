@@ -19,3 +19,37 @@ Client API documentation lives in:
 Quick Flutter guide:
 
 - `spec/client-api.md`
+
+## Client Mobile MVP - Implementation Status
+
+### Screen Map
+1. **MagicLinkEntry** (`Screen 4`): Initial authentication screen.
+   - Route: `/` (initial if no session)
+   - Features: Token input, error handling (`400`, `409`, `410`).
+2. **SessionBootstrap** (`Screen 1`): Splash and session validation.
+   - Route: `/bootstrap` (internal)
+   - Features: Checks token, loads profile/cards, redirects to Main or Login.
+3. **HomeCards** (`Screen 5`): Main dashboard (Tab 1).
+   - Route: `/main` -> Tab 0
+   - Features: List of active cards, "Add Card" placeholder.
+4. **CardDetail** (`Screen 3` + `Screen 2`): Detailed view.
+   - Route: `/card-detail`
+   - Features: Flip animation (Front/QR), Transaction history (Ledger).
+5. **Rewards** (`Screen 8`): Rewards placeholder (Tab 2).
+   - Route: `/main` -> Tab 1
+   - Features: "Coming Soon" static page.
+6. **Profile** (`Screen 6`): User profile (Tab 3).
+   - Route: `/main` -> Tab 2
+   - Features: User info, active cards count, Logout.
+
+### Endpoint Mapping
+- `POST /auth/client/magic-links/consume`: `ConsumeMagicLinkUseCase`
+- `GET /client/me/profile`: `GetProfileUseCase` -> `ClientRepository`
+- `GET /client/me/cards`: `GetMyCardsUseCase` -> `ClientCardsService`
+- `GET /client/me/ledger`: `GetClientLedgerUseCase` -> `ClientCardsService`
+
+### Known Backend Gaps / Assumptions
+- QR payload is generated using `qrserver.com` API as `qr_flutter` package was not available in environment constraints.
+- "Add Card" feature is mocked with a Snackbar.
+- Branding colors fallback to defaults if parsing fails.
+- `flutter_secure_storage` is used for token persistence.

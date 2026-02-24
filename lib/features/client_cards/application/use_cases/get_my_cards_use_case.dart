@@ -6,9 +6,7 @@ class GetMyCardsUseCase {
 
   final ClientCardsService _cardsService;
 
-  Future<List<ClientCard>> call({
-    required String accessToken,
-  }) {
-    return _cardsService.getMyCards(accessToken: accessToken);
+  Future<List<ClientCard>> call() {
+    return _cardsService.getMyCards();
   }
 }

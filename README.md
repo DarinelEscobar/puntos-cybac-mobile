@@ -49,7 +49,7 @@ Quick Flutter guide:
 - `GET /client/me/ledger`: `GetClientLedgerUseCase` -> `ClientCardsService`
 
 ### Known Backend Gaps / Assumptions
-- QR payload is generated using `qrserver.com` API as `qr_flutter` package was not available in environment constraints.
+- QR rendering is generated locally on-device from `qr_payload` using `qr_flutter` (no third-party QR API calls).
 - "Add Card" feature is mocked with a Snackbar.
 - Branding colors fallback to defaults if parsing fails.
 - `flutter_secure_storage` is used for token persistence.

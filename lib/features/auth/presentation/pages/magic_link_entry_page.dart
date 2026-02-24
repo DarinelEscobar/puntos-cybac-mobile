@@ -24,8 +24,13 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
       widget.dependencies.consumeMagicLinkUseCase;
 
   Future<void> _submit() async {
-    final token = _tokenController.text.trim();
-    if (token.isEmpty) return;
+    final token = _extractToken(_tokenController.text);
+    if (token == null) {
+      setState(() {
+        _error = 'Pega un token valido o un link con ?token=...';
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -41,16 +46,15 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => SessionBootstrapPage(
-              dependencies: widget.dependencies,
-            ),
+            builder: (context) =>
+                SessionBootstrapPage(dependencies: widget.dependencies),
           ),
         );
       }
     } on ApiClientException catch (e) {
       if (mounted) {
         setState(() {
-          _error = _mapErrorCodeToMessage(e.errorCode);
+          _error = _mapApiErrorToMessage(e);
           _isLoading = false;
         });
       }
@@ -64,7 +68,8 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
     }
   }
 
-  String _mapErrorCodeToMessage(String? code) {
+  String _mapApiErrorToMessage(ApiClientException error) {
+    final code = error.errorCode?.trim();
     switch (code) {
       case 'MAGIC_LINK_INVALID_FORMAT':
         return 'El enlace no es válido.';
@@ -73,8 +78,45 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
       case 'MAGIC_LINK_EXPIRED':
         return 'Este enlace expiró. Solicita uno nuevo.';
       default:
-        return 'No se pudo iniciar sesión ($code).';
+        final message = error.message.trim();
+        final lowerMessage = message.toLowerCase();
+
+        if (lowerMessage.contains('no host specified') ||
+            lowerMessage.contains('failed host lookup') ||
+            lowerMessage.contains('connection refused')) {
+          return 'No se pudo conectar al API. Revisa API_BASE_URL y que el backend esté accesible.';
+        }
+
+        if (message.isNotEmpty) {
+          if (error.statusCode != null) {
+            return '$message (HTTP ${error.statusCode}).';
+          }
+          return message;
+        }
+
+        return 'No se pudo iniciar sesión. Intenta nuevamente.';
     }
+  }
+
+  String? _extractToken(String input) {
+    final trimmed = input.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    try {
+      final uri = Uri.parse(trimmed);
+      final queryToken = uri.queryParameters['token'];
+      if (queryToken != null && queryToken.trim().isNotEmpty) {
+        return queryToken.trim();
+      }
+    } catch (_) {
+      // Ignore parse errors and continue with token heuristics.
+    }
+
+    final normalized = trimmed.replaceAll(RegExp(r'\s+'), '');
+    final match = RegExp(r'[A-Za-z0-9_-]{24,255}').firstMatch(normalized);
+    return match?.group(0);
   }
 
   @override
@@ -101,14 +143,18 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
                       }
                     },
                   ),
-                   Container(
+                  Container(
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
                       color: theme.primaryColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.loyalty, color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.loyalty,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 48), // Spacer
                 ],
@@ -122,7 +168,7 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
                   width: 180,
                   height: 180,
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -147,10 +193,20 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
               const SizedBox(height: 12),
 
               Text(
-                'Introduce el código de 6 dígitos que te enviamos para acceder a tus tarjetas.',
+                'Pega el enlace completo o el token recibido por correo para acceder a tus tarjetas.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: Colors.black54,
                   height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                'API: ${AppConstants.apiBaseUrl}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.black45,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -162,7 +218,8 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
                 controller: _tokenController,
                 decoration: InputDecoration(
                   labelText: 'Token de acceso',
-                  hintText: 'Ej. 123456',
+                  hintText:
+                      'Ej. cybacpuntos://magic-link?token=... o solo token',
                   prefixIcon: const Icon(Icons.key),
                   errorText: _error,
                 ),

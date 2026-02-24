@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../features/client_cards/domain/models/client_card.dart';
 
 class DigitalCard extends StatelessWidget {
@@ -16,8 +17,14 @@ class DigitalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final branding = card.branding;
-    final primaryColor = _hexToColor(branding.colorPrimary, const Color(0xFF195DE6));
-    final secondaryColor = _hexToColor(branding.colorSecondary, const Color(0xFF111621));
+    final primaryColor = _hexToColor(
+      branding.colorPrimary,
+      const Color(0xFF195DE6),
+    );
+    final secondaryColor = _hexToColor(
+      branding.colorSecondary,
+      const Color(0xFF111621),
+    );
     final accentColor = _hexToColor(branding.colorAccent, Colors.white);
 
     return GestureDetector(
@@ -33,7 +40,7 @@ class DigitalCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.3),
+              color: primaryColor.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -46,12 +53,16 @@ class DigitalCard extends StatelessWidget {
               // Background pattern
               Positioned.fill(
                 child: CustomPaint(
-                   painter: _PatternPainter(color: Colors.white.withOpacity(0.05)),
+                  painter: _PatternPainter(
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: isBack ? _buildBack(context) : _buildFront(context, accentColor),
+                child: isBack
+                    ? _buildBack(context)
+                    : _buildFront(context, accentColor),
               ),
             ],
           ),
@@ -74,9 +85,11 @@ class DigitalCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                     image: card.branding.logoUrl != null
                         ? DecorationImage(
                             image: NetworkImage(card.branding.logoUrl!),
@@ -100,23 +113,23 @@ class DigitalCard extends StatelessWidget {
                 ),
               ],
             ),
-             Container(
-               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-               decoration: BoxDecoration(
-                 color: accentColor.withOpacity(0.2),
-                 borderRadius: BorderRadius.circular(99),
-                 border: Border.all(color: accentColor.withOpacity(0.4)),
-               ),
-               child: Text(
-                 'MEMBER',
-                 style: TextStyle(
-                   color: accentColor,
-                   fontSize: 10,
-                   fontWeight: FontWeight.bold,
-                   letterSpacing: 1.2,
-                 ),
-               ),
-             ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(color: accentColor.withValues(alpha: 0.4)),
+              ),
+              child: Text(
+                'MEMBER',
+                style: TextStyle(
+                  color: accentColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
           ],
         ),
 
@@ -125,7 +138,11 @@ class DigitalCard extends StatelessWidget {
           children: [
             Text(
               'Saldo actual',
-              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 4),
             Row(
@@ -145,7 +162,7 @@ class DigitalCard extends StatelessWidget {
                 Text(
                   'Puntos',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
@@ -161,7 +178,7 @@ class DigitalCard extends StatelessWidget {
             Text(
               _formatCardUid(card.cardUid),
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontFamily: 'Monospace',
                 letterSpacing: 2.5,
                 fontSize: 14,
@@ -184,7 +201,7 @@ class DigitalCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -196,23 +213,39 @@ class DigitalCard extends StatelessWidget {
             SizedBox(
               width: 140,
               height: 140,
-              child: Image.network(
-                'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${Uri.encodeComponent(card.qrPayload)}',
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const Center(child: CircularProgressIndicator());
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error, color: Colors.grey),
-                      SizedBox(height: 4),
-                      Text("Error QR", style: TextStyle(fontSize: 10)),
-                    ],
-                  );
-                },
-              ),
+              child: card.qrPayload.trim().isEmpty
+                  ? const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.qr_code_2, color: Colors.grey),
+                        SizedBox(height: 4),
+                        Text('QR vacío', style: TextStyle(fontSize: 10)),
+                      ],
+                    )
+                  : QrImageView(
+                      data: card.qrPayload,
+                      size: 140,
+                      backgroundColor: Colors.white,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: Colors.black,
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: Colors.black,
+                      ),
+                      errorCorrectionLevel: QrErrorCorrectLevel.M,
+                      errorStateBuilder: (context, error) {
+                        return const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error, color: Colors.grey),
+                            SizedBox(height: 4),
+                            Text('Error QR', style: TextStyle(fontSize: 10)),
+                          ],
+                        );
+                      },
+                    ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -260,18 +293,18 @@ class _PatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-     final paint = Paint()
+    final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
-     canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.1), 80, paint);
-     canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.95), 60, paint);
+    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.1), 80, paint);
+    canvas.drawCircle(Offset(size.width * 0.05, size.height * 0.95), 60, paint);
 
-     // Add some grid lines pattern
-     paint.strokeWidth = 1;
-     paint.style = PaintingStyle.stroke;
+    // Add some grid lines pattern
+    paint.strokeWidth = 1;
+    paint.style = PaintingStyle.stroke;
 
-     // Removed grid to keep it simpler
+    // Removed grid to keep it simpler
   }
 
   @override

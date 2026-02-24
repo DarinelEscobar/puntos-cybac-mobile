@@ -2,6 +2,10 @@
 
 Este documento explica cómo iniciar el emulador `Pixel_7_API_34` usando el SDK en `C:\Android`, y cómo ejecutar la app Flutter en ese emulador.
 
+
+ C:\Android\emulator\emulator.exe -avd Pixel_7_API_34 -netdelay none -netspeed full
+
+ 
 ## Requisitos previos
 
 - Flutter SDK instalado en `C:\src\flutter`.

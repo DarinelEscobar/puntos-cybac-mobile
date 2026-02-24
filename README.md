@@ -1,16 +1,17 @@
 # puntos_cybac_mobile
 
-A new Flutter project.
+Flutter app for Puntos Cybac client mobile experience.
 
-## Getting Started
+## API Contract (Source of Truth)
 
-This project is a starting point for a Flutter application.
+Client API documentation lives in:
 
-A few resources to get you started if this is your first Flutter project:
+- `spec/openapi.yaml` (canonical API contract)
+- `spec/auth.md`
+- `spec/errors.md`
+- `spec/domain.md`
+- `spec/examples/*.json`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Quick Flutter guide:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- `spec/client-api.md`

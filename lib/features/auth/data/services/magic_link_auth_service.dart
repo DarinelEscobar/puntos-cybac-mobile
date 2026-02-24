@@ -1,4 +1,5 @@
-import '../../core/api/api_client.dart';
+import '../../../../core/network/api_client.dart';
+import '../../domain/models/magic_link_session.dart';
 
 class MagicLinkAuthService {
   MagicLinkAuthService(this._apiClient);
@@ -46,16 +47,4 @@ class MagicLinkAuthService {
               : null,
     );
   }
-}
-
-class MagicLinkSession {
-  const MagicLinkSession({
-    required this.accessToken,
-    required this.tokenType,
-    required this.defaultMembershipId,
-  });
-
-  final String accessToken;
-  final String tokenType;
-  final String? defaultMembershipId;
 }

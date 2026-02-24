@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../auth/data/magic_link_auth_service.dart';
-import '../client/data/client_cards_service.dart';
-import '../core/api/api_client.dart';
-import '../core/constants/app_constants.dart';
-import '../shared/models/client_card.dart';
-import 'home_controller.dart';
+import '../../../../app/di/app_dependencies.dart';
+import '../../../../core/config/app_constants.dart';
+import '../../../client_cards/domain/models/client_card.dart';
+import '../controllers/home_controller.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+    required this.dependencies,
+  });
+
+  final AppDependencies dependencies;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -21,11 +24,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    final apiClient = ApiClient(baseUrl: AppConstants.apiBaseUrl);
     _controller = HomeController(
-      apiClient: apiClient,
-      authService: MagicLinkAuthService(apiClient),
-      cardsService: ClientCardsService(apiClient),
+      activateSessionFromMagicLinkUseCase:
+          widget.dependencies.activateSessionFromMagicLinkUseCase,
+      getMyCardsUseCase: widget.dependencies.getMyCardsUseCase,
+      deepLinkService: widget.dependencies.deepLinkService,
     );
     _controller.initialize();
   }

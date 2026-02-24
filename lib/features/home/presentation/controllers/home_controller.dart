@@ -1,29 +1,29 @@
 import 'dart:async';
 
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 
-import '../auth/data/magic_link_auth_service.dart';
-import '../core/api/api_client.dart';
-import '../core/constants/app_constants.dart';
-import '../client/data/client_cards_service.dart';
-import '../shared/models/client_card.dart';
+import '../../../../core/config/app_constants.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../integrations/deep_links/deep_link_service.dart';
+import '../../../client_cards/application/use_cases/get_my_cards_use_case.dart';
+import '../../../client_cards/domain/models/client_card.dart';
+import '../../application/use_cases/activate_session_from_magic_link_use_case.dart';
 
 class HomeController extends ChangeNotifier {
   HomeController({
-    required MagicLinkAuthService authService,
-    required ClientCardsService cardsService,
-    required ApiClient apiClient,
-    AppLinks? appLinks,
-  })  : _authService = authService,
-        _cardsService = cardsService,
-        _apiClient = apiClient,
-        _appLinks = appLinks ?? AppLinks();
+    required ActivateSessionFromMagicLinkUseCase
+        activateSessionFromMagicLinkUseCase,
+    required GetMyCardsUseCase getMyCardsUseCase,
+    required DeepLinkService deepLinkService,
+  })  : _activateSessionFromMagicLinkUseCase =
+            activateSessionFromMagicLinkUseCase,
+        _getMyCardsUseCase = getMyCardsUseCase,
+        _deepLinkService = deepLinkService;
 
-  final MagicLinkAuthService _authService;
-  final ClientCardsService _cardsService;
-  final ApiClient _apiClient;
-  final AppLinks _appLinks;
+  final ActivateSessionFromMagicLinkUseCase
+      _activateSessionFromMagicLinkUseCase;
+  final GetMyCardsUseCase _getMyCardsUseCase;
+  final DeepLinkService _deepLinkService;
 
   StreamSubscription<Uri>? _deepLinkSubscription;
 
@@ -52,7 +52,7 @@ class HomeController extends ChangeNotifier {
     }
 
     _initialized = true;
-    _deepLinkSubscription = _appLinks.uriLinkStream.listen(
+    _deepLinkSubscription = _deepLinkService.uriStream.listen(
       (uri) async {
         await consumeFromUri(uri);
       },
@@ -62,7 +62,7 @@ class HomeController extends ChangeNotifier {
     );
 
     try {
-      final initialUri = await _appLinks.getInitialLink();
+      final initialUri = await _deepLinkService.getInitialUri();
       if (initialUri != null) {
         await consumeFromUri(initialUri);
       }
@@ -100,7 +100,7 @@ class HomeController extends ChangeNotifier {
 
     _setLoading(true, 'Consultando /client/me/cards ...');
     try {
-      _cards = await _cardsService.getMyCards(accessToken: _accessToken!);
+      _cards = await _getMyCardsUseCase(accessToken: _accessToken!);
       _errorMessage = null;
       _infoMessage = 'Cards actualizadas: ${_cards.length}.';
     } on ApiClientException catch (error) {
@@ -125,16 +125,13 @@ class HomeController extends ChangeNotifier {
     _lastToken = token;
     _setLoading(true, 'Consumiendo magic-link ...');
     try {
-      final session = await _authService.consumeMagicLink(
+      final result = await _activateSessionFromMagicLinkUseCase(
         token: token,
         deviceName: AppConstants.defaultDeviceName,
       );
-      _accessToken = session.accessToken;
+      _accessToken = result.accessToken;
+      _cards = result.cards;
       _errorMessage = null;
-      _infoMessage = 'Sesion creada. Cargando cards ...';
-      notifyListeners();
-
-      _cards = await _cardsService.getMyCards(accessToken: _accessToken!);
       _infoMessage = 'Sesion activa. Cards cargadas: ${_cards.length}.';
     } on ApiClientException catch (error) {
       _setError(error.toString());
@@ -192,7 +189,6 @@ class HomeController extends ChangeNotifier {
   @override
   void dispose() {
     _deepLinkSubscription?.cancel();
-    _apiClient.dispose();
     super.dispose();
   }
 }

@@ -2,6 +2,10 @@
 
 Flutter app for Puntos Cybac client mobile experience.
 
+## Project Architecture
+
+- `docs/architecture.md` (folder structure + modularity rules)
+
 ## API Contract (Source of Truth)
 
 Client API documentation lives in:

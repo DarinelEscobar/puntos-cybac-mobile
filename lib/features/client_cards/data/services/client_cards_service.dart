@@ -1,5 +1,5 @@
-import '../../core/api/api_client.dart';
-import '../../shared/models/client_card.dart';
+import '../../../../core/network/api_client.dart';
+import '../../domain/models/client_card.dart';
 
 class ClientCardsService {
   ClientCardsService(this._apiClient);

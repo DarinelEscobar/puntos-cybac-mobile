@@ -9,7 +9,6 @@ import '../../../../core/ui/widgets/digital_card.dart';
 import '../../../../core/ui/widgets/error_view.dart';
 import '../../../../core/ui/widgets/loader.dart';
 import '../../application/use_cases/get_client_ledger_use_case.dart';
-import '../../data/services/client_cards_service.dart';
 import '../../domain/models/client_card.dart';
 import '../../domain/models/ledger_entry.dart';
 

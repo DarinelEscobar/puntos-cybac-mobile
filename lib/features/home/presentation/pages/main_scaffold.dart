@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../app/di/app_dependencies.dart';
-import '../../client_cards/presentation/pages/home_cards_page.dart';
-import '../../profile/presentation/pages/profile_page.dart';
-import '../../rewards/presentation/pages/rewards_page.dart';
+import '../../../client_cards/presentation/pages/home_cards_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../rewards/presentation/pages/rewards_page.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key, required this.dependencies});

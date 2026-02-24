@@ -1,4 +1,4 @@
-import '../../../../client_cards/domain/models/client_card.dart';
+import '../../../client_cards/domain/models/client_card.dart';
 import '../../../profile/domain/models/client_profile.dart';
 
 class MagicLinkSession {

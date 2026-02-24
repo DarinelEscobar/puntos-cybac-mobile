@@ -100,7 +100,7 @@ class HomeController extends ChangeNotifier {
 
     _setLoading(true, 'Consultando /client/me/cards ...');
     try {
-      _cards = await _getMyCardsUseCase(accessToken: _accessToken!);
+      _cards = await _getMyCardsUseCase();
       _errorMessage = null;
       _infoMessage = 'Cards actualizadas: ${_cards.length}.';
     } on ApiClientException catch (error) {

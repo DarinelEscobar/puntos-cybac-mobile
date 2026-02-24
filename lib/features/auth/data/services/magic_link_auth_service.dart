@@ -1,6 +1,6 @@
-import '../../../../client_cards/domain/models/client_card.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/services/token_storage_service.dart';
+import '../../../client_cards/domain/models/client_card.dart';
 import '../../../profile/domain/models/client_profile.dart';
 import '../../domain/models/magic_link_session.dart';
 

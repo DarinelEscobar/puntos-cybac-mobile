@@ -52,7 +52,7 @@ class AppTheme {
         bodySmall: TextStyle(fontFamily: 'Inter', color: textSecondaryLight),
         labelLarge: TextStyle(fontFamily: 'Inter', color: textPrimaryLight),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surfaceLight,
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.05),

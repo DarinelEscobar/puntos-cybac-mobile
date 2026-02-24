@@ -23,9 +23,8 @@ class ClientCardsService {
     }
 
     return payload
-        .whereType<Map>()
-        .map((map) => map.map((key, value) => MapEntry(key.toString(), value)))
-        .map((map) => ClientCard.fromJson(map))
+        .whereType<Map<String, dynamic>>()
+        .map(ClientCard.fromJson)
         .toList(growable: false);
   }
 }

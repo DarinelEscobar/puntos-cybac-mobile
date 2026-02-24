@@ -100,6 +100,8 @@ paths:
         - Client App
       summary: Perfil del cliente autenticado
       operationId: clientProfile
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Perfil del cliente y memberships.
@@ -150,6 +152,8 @@ paths:
         - Client App
       summary: Lista de tarjetas del cliente por membership
       operationId: clientCards
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: Tarjetas del cliente.
@@ -208,6 +212,8 @@ paths:
         Retorna movimientos append-only ordenados del más reciente al más antiguo.
         Si se envía `membership_id`, debe pertenecer al cliente autenticado.
       operationId: clientLedgerHistory
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PerPage'

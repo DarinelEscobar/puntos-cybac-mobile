@@ -18,6 +18,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static final _hexColorRegExp = RegExp(r'^[0-9a-fA-F]{6}$');
+
   late final HomeController _controller;
   final TextEditingController _linkController = TextEditingController();
 
@@ -308,7 +310,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     final normalized = hex.trim().replaceFirst('#', '');
-    if (!RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(normalized)) {
+    if (!_hexColorRegExp.hasMatch(normalized)) {
       return fallback;
     }
 

@@ -1,0 +1,42 @@
+{
+  "status": "success",
+  "message": "Client ledger fetched.",
+  "data": [
+    {
+      "id": "3b9f5d26-4b12-4a78-bd50-92c9ca611111",
+      "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+      "actor_user_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "type": "EARN",
+      "points_delta": 30,
+      "purchase_amount_mxn": 450,
+      "reward_id": null,
+      "note": "Ticket #A-120",
+      "related_entry_id": null,
+      "created_at": "2026-02-16T09:30:00Z"
+    },
+    {
+      "id": "32196ac2-244a-4487-b4be-4f2013333333",
+      "membership_id": "11111111-1111-4111-8111-111111111111",
+      "actor_user_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "type": "EARN",
+      "points_delta": 15,
+      "purchase_amount_mxn": 220,
+      "reward_id": null,
+      "note": "Ticket #B-905",
+      "related_entry_id": null,
+      "created_at": "2026-02-16T08:50:00Z"
+    }
+  ],
+  "meta": {
+    "timestamp": "2026-02-16T10:23:30Z",
+    "path": "api/v1/client/me/ledger?page=1&per_page=25",
+    "version": "v1",
+    "pagination": {
+      "total": 14,
+      "count": 2,
+      "per_page": 25,
+      "current_page": 1,
+      "total_pages": 1
+    }
+  }
+}

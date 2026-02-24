@@ -1,0 +1,59 @@
+{
+  "status": "success",
+  "message": "Client session created.",
+  "data": {
+    "access_token": "<SECRET>",
+    "token_type": "Bearer",
+    "profile": {
+      "client_identity": {
+        "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+        "full_name": "Jane Client",
+        "email": "jane.client@test.com",
+        "phone": "+5215550000000",
+        "created_at": "2026-02-10T10:00:00Z"
+      },
+      "memberships": [
+        {
+          "membership": {
+            "id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+            "company_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            "client_identity_id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+            "status": "ACTIVE",
+            "card_uid": "CARD-0001",
+            "points_balance_cached": 480,
+            "created_at": "2026-02-14T12:00:00Z"
+          },
+          "client_identity": {
+            "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+            "full_name": "Jane Client",
+            "email": "jane.client@test.com",
+            "phone": "+5215550000000",
+            "created_at": "2026-02-10T10:00:00Z"
+          }
+        }
+      ]
+    },
+    "cards": [
+      {
+        "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+        "company_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "company_name": "Glow Clinic",
+        "card_uid": "CARD-0001",
+        "status": "ACTIVE",
+        "qr_payload": "CARD-0001",
+        "points_balance": 480,
+        "branding": {
+          "logo_url": "https://cdn.example.com/glow/logo.png",
+          "color_primary": "#0A2540",
+          "color_secondary": "#5B7FFF",
+          "color_accent": "#F9C846"
+        }
+      }
+    ]
+  },
+  "meta": {
+    "timestamp": "2026-02-16T10:20:00Z",
+    "path": "api/v1/auth/client/magic-links/consume",
+    "version": "v1"
+  }
+}

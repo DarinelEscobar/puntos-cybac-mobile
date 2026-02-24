@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "CLIENT_UNAUTHENTICATED",
+    "message": "Client authentication is required.",
+    "details": {
+      "reason": "missing_or_invalid_token"
+    }
+  }
+}

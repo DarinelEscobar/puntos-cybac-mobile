@@ -1,0 +1,30 @@
+{
+  "status": "success",
+  "message": "Client ledger fetched.",
+  "data": [
+    {
+      "id": "3b9f5d26-4b12-4a78-bd50-92c9ca611111",
+      "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+      "actor_user_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      "type": "EARN",
+      "points_delta": 30,
+      "purchase_amount_mxn": 450,
+      "reward_id": null,
+      "note": "Ticket #A-120",
+      "related_entry_id": null,
+      "created_at": "2026-02-16T09:30:00Z"
+    }
+  ],
+  "meta": {
+    "timestamp": "2026-02-16T10:23:00Z",
+    "path": "api/v1/client/me/ledger?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&page=1&per_page=25",
+    "version": "v1",
+    "pagination": {
+      "total": 2,
+      "count": 1,
+      "per_page": 25,
+      "current_page": 1,
+      "total_pages": 1
+    }
+  }
+}

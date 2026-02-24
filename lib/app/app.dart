@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_theme.dart';
-import '../features/home/presentation/pages/home_page.dart';
+import '../features/home/presentation/pages/session_bootstrap_page.dart';
 import 'di/app_dependencies.dart';
 
 class PuntosCybacApp extends StatefulWidget {
@@ -29,9 +29,10 @@ class _PuntosCybacAppState extends State<PuntosCybacApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Puntos CYBAC',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: HomePage(dependencies: _dependencies),
+      home: SessionBootstrapPage(dependencies: _dependencies),
     );
   }
 }

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v11/terminal-keeper.json",
+  "theme": "tribe",
+  "active": "default",
+  "activateOnStartup": true,
+  "keepExistingTerminals": false,
+  "sessions": {
+    "default": [
+      {
+        "name": "Android – Start Emulator",
+        "terminalProfile": "PowerShell",
+        "autoExecuteCommands": true,
+        "icon": "play",
+        "color": "terminal.ansiBrightCyan",
+        "commands": [
+          "$env:ANDROID_SDK_ROOT='C:\\Android'",
+          "$env:Path='C:\\src\\flutter\\bin;C:\\Android\\platform-tools;' + $env:Path",
+          "adb start-server",
+          "C:\\Android\\emulator\\emulator.exe -avd Pixel_7_API_34 -netdelay none -netspeed full -no-snapshot"
+        ]
+      },
+      {
+        "name": "Flutter – Run on Emulator",
+        "terminalProfile": "PowerShell",
+        "autoExecuteCommands": true,
+        "icon": "rocket",
+        "color": "terminal.ansiBrightGreen",
+        "commands": [
+          "$env:ANDROID_SDK_ROOT='C:\\Android'",
+          "$env:Path='C:\\src\\flutter\\bin;C:\\Android\\platform-tools;' + $env:Path",
+          "adb wait-for-device",
+          "flutter devices --device-timeout 60",
+          "flutter run -d emulator-5554"
+        ]
+      }
+    ]
+  }
+}

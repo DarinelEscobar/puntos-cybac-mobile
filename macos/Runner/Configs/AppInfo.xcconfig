@@ -8,7 +8,7 @@
 PRODUCT_NAME = puntos_cybac_mobile
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.puntosCybacMobile
+PRODUCT_BUNDLE_IDENTIFIER = com.cybac.puntos
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.cybac. All rights reserved.

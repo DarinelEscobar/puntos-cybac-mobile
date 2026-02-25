@@ -76,26 +76,7 @@ class DigitalCard extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: textColor.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: textColor.withValues(alpha: 0.15),
-                      ),
-                      image: card.branding.logoUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(card.branding.logoUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: card.branding.logoUrl == null
-                        ? Icon(Icons.local_cafe, color: textColor)
-                        : null,
-                  ),
+                  _buildBrandAvatar(textColor),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -329,6 +310,69 @@ class DigitalCard extends StatelessWidget {
       return '•••• ${uid.substring(uid.length - 4)}';
     }
     return uid;
+  }
+
+  Widget _buildBrandAvatar(Color textColor) {
+    final logoUrl = card.branding.logoUrl?.trim();
+    final hasLogoUrl = logoUrl != null && logoUrl.isNotEmpty;
+
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: textColor.withValues(alpha: 0.2),
+        shape: BoxShape.circle,
+        border: Border.all(color: textColor.withValues(alpha: 0.15)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: hasLogoUrl
+          ? Image.network(
+              logoUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return _buildLogoFallback(textColor);
+              },
+            )
+          : _buildLogoFallback(textColor),
+    );
+  }
+
+  Widget _buildLogoFallback(Color textColor) {
+    final initials = _companyInitials(card.companyName);
+
+    return Center(
+      child: Text(
+        initials,
+        maxLines: 1,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.4,
+        ),
+      ),
+    );
+  }
+
+  String _companyInitials(String companyName) {
+    final cleaned = companyName.trim();
+    if (cleaned.isEmpty) return 'PC';
+
+    final words = cleaned
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .toList(growable: false);
+
+    if (words.isEmpty) return 'PC';
+    if (words.length == 1) {
+      return words.first
+          .substring(0, words.first.length >= 2 ? 2 : 1)
+          .toUpperCase();
+    }
+
+    final first = words[0].substring(0, 1);
+    final second = words[1].substring(0, 1);
+    return '$first$second'.toUpperCase();
   }
 
   _CardPalette _resolvePalette(CardBranding branding) {

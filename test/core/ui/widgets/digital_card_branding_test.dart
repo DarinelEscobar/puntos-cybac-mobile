@@ -74,23 +74,48 @@ void main() {
         expect(gradient.colors.last, isNot(gradient.colors.first));
       },
     );
+
+    testWidgets('shows company initials when logo_url is missing', (
+      WidgetTester tester,
+    ) async {
+      final card = _cardWithBranding(
+        companyName: 'Aurora Clinic',
+        colorPrimary: '#0F172A',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(width: 360, child: DigitalCard(card: card)),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('AC'), findsOneWidget);
+      expect(find.byIcon(Icons.local_cafe), findsNothing);
+    });
   });
 }
 
 ClientCard _cardWithBranding({
+  String companyName = 'Aurora',
   String? colorPrimary,
   String? colorSecondary,
   String? colorAccent,
+  String? logoUrl,
 }) {
   return ClientCard.fromJson(<String, dynamic>{
     'membership_id': 'membership-1',
     'company_id': 'company-1',
-    'company_name': 'Aurora',
+    'company_name': companyName,
     'card_uid': 'CARD-0010',
     'status': 'ACTIVE',
     'qr_payload': 'CARD-0010',
     'points_balance': 250,
     'branding': <String, dynamic>{
+      'logo_url': logoUrl,
       'color_primary': colorPrimary,
       'color_secondary': colorSecondary,
       'color_accent': colorAccent,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../app/di/app_dependencies.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/ui/widgets/error_view.dart';
@@ -116,6 +117,41 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   profile.phone,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'ID perfil: ${profile.id}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[700],
+                            fontFamily: 'monospace',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 18),
+                        tooltip: 'Copiar ID',
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: profile.id));
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('ID de perfil copiado')),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 32),

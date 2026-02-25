@@ -8,7 +8,11 @@ class GetMyCardsUseCase {
 
   Future<List<ClientCard>> call({
     required String accessToken,
+    bool forceRefresh = false,
   }) {
-    return _cardsService.getMyCards(accessToken: accessToken);
+    return _cardsService.getMyCards(
+      accessToken: accessToken,
+      forceRefresh: forceRefresh,
+    );
   }
 }

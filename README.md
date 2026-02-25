@@ -34,12 +34,9 @@ Quick Flutter guide:
    - Features: List of active cards, "Add Card" placeholder.
 4. **CardDetail** (`Screen 3` + `Screen 2`): Detailed view.
    - Route: `/card-detail`
-   - Features: Flip animation (Front/QR), Transaction history (Ledger).
-5. **Rewards** (`Screen 8`): Rewards placeholder (Tab 2).
+   - Features: Flip animation (Front/QR), section switch `Historial | Rewards` by selected card.
+5. **Profile** (`Screen 6`): User profile (Tab 2).
    - Route: `/main` -> Tab 1
-   - Features: "Coming Soon" static page.
-6. **Profile** (`Screen 6`): User profile (Tab 3).
-   - Route: `/main` -> Tab 2
    - Features: User info, active cards count, Logout.
 
 ### Endpoint Mapping
@@ -47,6 +44,7 @@ Quick Flutter guide:
 - `GET /client/me/profile`: `GetProfileUseCase` -> `ClientRepository`
 - `GET /client/me/cards`: `GetMyCardsUseCase` -> `ClientCardsService`
 - `GET /client/me/ledger`: `GetClientLedgerUseCase` -> `ClientCardsService`
+- `GET /client/me/rewards`: `GetClientRewardsUseCase` -> `ClientCardsService`
 
 ### Known Backend Gaps / Assumptions
 - QR rendering is generated locally on-device from `qr_payload` using `qr_flutter` (no third-party QR API calls).

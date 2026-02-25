@@ -4,6 +4,7 @@
 
 - Un cliente puede tener múltiples memberships (una por empresa).
 - `GET /client/me/cards` retorna una tarjeta por membership.
+- `GET /client/me/rewards` retorna rewards activas solo de la company asociada a una membership.
 - `GET /client/me/ledger` retorna movimientos ordenados newest-first.
 - Si se filtra por `membership_id`, debe pertenecer al cliente autenticado.
 - La sesión de cliente se crea solo consumiendo magic-link válido.

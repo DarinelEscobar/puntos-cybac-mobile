@@ -12,6 +12,7 @@ Esta guía resume el contrato cliente para implementar la app móvil Flutter sin
   - `POST /auth/client/magic-links/consume`
   - `GET /client/me/profile`
   - `GET /client/me/cards`
+  - `GET /client/me/rewards`
   - `GET /client/me/ledger`
 
 ## Autenticación (MVP)
@@ -233,7 +234,53 @@ Response `200`:
 
 > Decisión MVP: `branding` va embebido en cada card. No hay endpoint extra de branding para cliente.
 
-### 4) Ledger filtrado por membresía
+### 4) Rewards por tarjeta (por company de la membership)
+
+`GET /client/me/rewards?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff`
+
+Response `200`:
+
+```json
+{
+  "status": "success",
+  "message": "Client rewards fetched.",
+  "data": {
+    "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "rewards": [
+      {
+        "id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+        "company_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "name": "Cafe gratis",
+        "type": "FIXED_REWARD",
+        "points_cost": 80,
+        "is_active": true,
+        "created_at": "2026-02-16T10:20:00Z"
+      }
+    ]
+  },
+  "meta": {
+    "timestamp": "2026-02-16T10:24:00Z",
+    "path": "api/v1/client/me/rewards?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "version": "v1"
+  }
+}
+```
+
+Si `membership_id` es inválido o no viene:
+
+```json
+{
+  "error": {
+    "code": "INVALID_QUERY_PARAMS",
+    "message": "Query parameters are invalid.",
+    "details": {
+      "membership_id": "invalid"
+    }
+  }
+}
+```
+
+### 5) Ledger filtrado por membresía
 
 `GET /client/me/ledger?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&page=1&per_page=25`
 
@@ -286,7 +333,7 @@ Si `membership_id` no pertenece al cliente autenticado:
 }
 ```
 
-### 5) Ledger combinado (sin filtro)
+### 6) Ledger combinado (sin filtro)
 
 `GET /client/me/ledger?page=1&per_page=25`
 
@@ -368,6 +415,7 @@ Response `200` (combina todas las memberships, newest first):
 | `POST /auth/client/magic-links/consume` | Consumir magic-link y crear sesión persistente | No | `400`, `409`, `410` |
 | `GET /client/me/profile` | Traer perfil + memberships del cliente | Sí | `401` |
 | `GET /client/me/cards` | Traer cards con `points_balance` + branding embebido | Sí | `401` |
+| `GET /client/me/rewards` | Traer rewards activas de la company de una tarjeta (`membership_id`) | Sí | `400`, `401`, `403` |
 | `GET /client/me/ledger` | Historial append-only de puntos (todas o una membership) | Sí | `401`, `403` |
 
 ## Contrato fuera de MVP (no usar)

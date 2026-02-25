@@ -203,6 +203,60 @@ paths:
         '401':
           $ref: '#/components/responses/ClientUnauthenticated'
 
+  /client/me/rewards:
+    get:
+      tags:
+        - Client App
+      summary: Rewards activas por tarjeta (membership)
+      description: Retorna rewards activas de la company asociada a la tarjeta seleccionada.
+      operationId: clientRewardsByMembership
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MembershipIdRequiredQuery'
+      responses:
+        '200':
+          description: Rewards activas de la membership solicitada.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ClientMembershipRewards'
+              example:
+                status: success
+                message: Client rewards fetched.
+                data:
+                  membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
+                  rewards:
+                    - id: dddddddd-dddd-4ddd-8ddd-dddddddddddd
+                      company_id: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+                      name: Cafe gratis
+                      type: FIXED_REWARD
+                      points_cost: 80
+                      is_active: true
+                      created_at: '2026-02-16T10:20:00Z'
+                    - id: eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee
+                      company_id: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+                      name: Descuento 20%
+                      type: VOUCHER
+                      points_cost: 120
+                      is_active: true
+                      created_at: '2026-02-15T14:20:00Z'
+                meta:
+                  timestamp: '2026-02-16T10:24:00Z'
+                  path: api/v1/client/me/rewards?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff
+                  version: v1
+        '400':
+          $ref: '#/components/responses/ClientInvalidQueryParams'
+        '401':
+          $ref: '#/components/responses/ClientUnauthenticated'
+        '403':
+          $ref: '#/components/responses/ClientMembershipForbidden'
+
   /client/me/ledger:
     get:
       tags:
@@ -342,6 +396,14 @@ components:
       schema:
         type: string
         format: uuid
+    MembershipIdRequiredQuery:
+      name: membership_id
+      in: query
+      description: UUID de membership para cargar rewards de esa tarjeta.
+      required: true
+      schema:
+        type: string
+        format: uuid
 
   responses:
     ClientUnauthenticated:
@@ -369,6 +431,18 @@ components:
               message: The selected membership does not belong to the authenticated client.
               details:
                 membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
+    ClientInvalidQueryParams:
+      description: Query params inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: INVALID_QUERY_PARAMS
+              message: Query parameters are invalid.
+              details:
+                membership_id: invalid
 
     ClientInvalidMagicLinkToken:
       description: Formato de token inválido.
@@ -614,6 +688,55 @@ components:
           type: integer
         branding:
           $ref: '#/components/schemas/ClientBranding'
+
+    Reward:
+      type: object
+      required:
+        - id
+        - company_id
+        - name
+        - type
+        - points_cost
+        - is_active
+      properties:
+        id:
+          type: string
+          format: uuid
+        company_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - FIXED_REWARD
+            - FIXED_PRIZE
+            - PRODUCT
+            - SERVICE
+            - VOUCHER
+        points_cost:
+          type: integer
+          minimum: 1
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    ClientMembershipRewards:
+      type: object
+      required:
+        - membership_id
+        - rewards
+      properties:
+        membership_id:
+          type: string
+          format: uuid
+        rewards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reward'
 
     ClientSessionPayload:
       type: object

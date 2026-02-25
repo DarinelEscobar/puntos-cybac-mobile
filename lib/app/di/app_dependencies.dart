@@ -5,6 +5,7 @@ import '../../core/services/token_storage_service.dart';
 import '../../features/auth/application/use_cases/consume_magic_link_use_case.dart';
 import '../../features/auth/data/services/magic_link_auth_service.dart';
 import '../../features/client_cards/application/use_cases/get_client_ledger_use_case.dart';
+import '../../features/client_cards/application/use_cases/get_client_rewards_use_case.dart';
 import '../../features/client_cards/application/use_cases/get_my_cards_use_case.dart';
 import '../../features/client_cards/data/services/client_cards_service.dart';
 import '../../features/home/application/use_cases/activate_session_from_magic_link_use_case.dart';
@@ -20,6 +21,7 @@ class AppDependencies {
     required this.getMyCardsUseCase,
     required this.getProfileUseCase,
     required this.getClientLedgerUseCase,
+    required this.getClientRewardsUseCase,
     required this.activateSessionFromMagicLinkUseCase,
     required this.deepLinkService,
   });
@@ -30,11 +32,16 @@ class AppDependencies {
   final GetMyCardsUseCase getMyCardsUseCase;
   final GetProfileUseCase getProfileUseCase;
   final GetClientLedgerUseCase getClientLedgerUseCase;
+  final GetClientRewardsUseCase getClientRewardsUseCase;
   final ActivateSessionFromMagicLinkUseCase activateSessionFromMagicLinkUseCase;
   final DeepLinkService deepLinkService;
 
   factory AppDependencies.create() {
     final apiBaseUrl = AppConstants.apiBaseUrl;
+    if (kDebugMode) {
+      debugPrint('Resolved API_BASE_URL: $apiBaseUrl');
+    }
+
     if (kReleaseMode && !apiBaseUrl.startsWith('https://')) {
       throw ArgumentError('API_BASE_URL must use HTTPS in release mode.');
     }
@@ -49,6 +56,7 @@ class AppDependencies {
     final getMyCardsUseCase = GetMyCardsUseCase(cardsService);
     final getProfileUseCase = GetProfileUseCase(clientRepo);
     final getClientLedgerUseCase = GetClientLedgerUseCase(cardsService);
+    final getClientRewardsUseCase = GetClientRewardsUseCase(cardsService);
 
     return AppDependencies._(
       apiClient: apiClient,
@@ -57,6 +65,7 @@ class AppDependencies {
       getMyCardsUseCase: getMyCardsUseCase,
       getProfileUseCase: getProfileUseCase,
       getClientLedgerUseCase: getClientLedgerUseCase,
+      getClientRewardsUseCase: getClientRewardsUseCase,
       activateSessionFromMagicLinkUseCase: ActivateSessionFromMagicLinkUseCase(
         consumeMagicLinkUseCase: consumeMagicLinkUseCase,
         getMyCardsUseCase: getMyCardsUseCase,

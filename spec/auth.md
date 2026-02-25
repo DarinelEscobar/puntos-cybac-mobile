@@ -7,6 +7,7 @@
 - Endpoints protegidos:
   - `GET /api/v1/client/me/profile`
   - `GET /api/v1/client/me/cards`
+  - `GET /api/v1/client/me/rewards`
   - `GET /api/v1/client/me/ledger`
 
 ## Flujo recomendado para mobile

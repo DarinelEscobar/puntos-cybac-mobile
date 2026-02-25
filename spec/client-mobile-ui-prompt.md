@@ -10,7 +10,7 @@ Incluye:
 - Sesion persistente en telefono.
 - Vista de tarjetas digitales (una por membership/empresa).
 - Lista principal de cards con informacion esencial y minima (sin saturacion visual).
-- Detalle de tarjeta con historial de movimientos de esa tarjeta.
+- Detalle de tarjeta con secciones por card: historial y rewards de esa company.
 - Tarjeta reversible (frente/reverso) para mostrar QR en el reverso.
 - Perfil basico de cliente (solo lectura).
 - Estados UX: loading, vacio, error, sin conexion, sesion expirada.
@@ -32,7 +32,7 @@ No incluye:
   - `Tarjetas` (principal)
   - `Profile`
 - Flujo desde `HomeCards`:
-  - Tap en card -> `CardDetail` (incluye historial filtrado por esa tarjeta)
+  - Tap en card -> `CardDetail` (incluye historial y rewards filtrados por esa tarjeta)
 
 ## 3) Pantallas y contenido minimo
 
@@ -96,12 +96,18 @@ Componentes:
   - `card_uid` para fallback manual
 - Boton/gesto `Voltear tarjeta` con animacion de flip.
 - Seccion "Movimientos de esta tarjeta" debajo de la card:
+- Selector de seccion `Historial | Rewards` debajo de la card.
+- Seccion "Movimientos de esta tarjeta":
   - lista newest-first
   - tipo (`EARN`, `REDEEM`, `ADJUST`)
   - `points_delta`
   - fecha/hora
   - nota opcional
   - paginacion/infinite scroll
+- Seccion "Rewards de esta tarjeta":
+  - lista de rewards activas de la misma company
+  - `name`, `type`, `points_cost`
+  - estado vacio claro cuando no haya rewards
 
 Estados:
 - Loading inicial de detalle.
@@ -150,6 +156,7 @@ Usar estos endpoints para poblar UI:
 - `POST /api/v1/auth/client/magic-links/consume`
 - `GET /api/v1/client/me/profile`
 - `GET /api/v1/client/me/cards`
+- `GET /api/v1/client/me/rewards`
 - `GET /api/v1/client/me/ledger`
 
 Documento de referencia del contrato:
@@ -198,6 +205,18 @@ UI a mostrar:
 ### 6.4 `GET /api/v1/client/me/ledger`
 Query recomendada para detalle por tarjeta:
 - `membership_id=<id>&page=1&per_page=25`
+
+### 6.5 `GET /api/v1/client/me/rewards`
+Query requerida para detalle por tarjeta:
+- `membership_id=<id>`
+
+Datos clave:
+- `data.membership_id`
+- `data.rewards[]` con `name`, `type`, `points_cost`, `is_active`
+
+UI a mostrar:
+- CardDetail en la seccion `Rewards`.
+- Nunca mezclar rewards de multiples tarjetas/companies.
 
 Datos clave por movimiento:
 - `id`

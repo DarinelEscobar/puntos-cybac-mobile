@@ -11,20 +11,95 @@ class AppConstants {
   }
 
   static String _normalizeApiBaseUrl(String baseUrl) {
-    var normalized = baseUrl.trim();
-    if (normalized.endsWith('/')) {
-      normalized = normalized.substring(0, normalized.length - 1);
+    final cleaned = _sanitizeBaseUrlInput(baseUrl);
+    final parsed = _parseBaseUri(cleaned);
+    if (parsed == null || parsed.host.trim().isEmpty) {
+      return _defaultApiBaseUrl;
     }
 
-    // Keep callers flexible: if they pass only host/port, force API v1 path.
-    final lower = normalized.toLowerCase();
-    if (lower.endsWith('/api/v1')) {
-      return normalized;
+    final origin = StringBuffer()
+      ..write(parsed.scheme.isEmpty ? 'http' : parsed.scheme)
+      ..write('://')
+      ..write(parsed.host);
+
+    if (parsed.hasPort) {
+      origin
+        ..write(':')
+        ..write(parsed.port);
     }
+
+    final normalizedPath = _normalizeApiPath(parsed.path);
+    return '${origin.toString()}$normalizedPath';
+  }
+
+  static String _sanitizeBaseUrlInput(String rawValue) {
+    var value = rawValue.trim();
+
+    while ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.substring(1, value.length - 1).trim();
+    }
+
+    return value.replaceAll('\\', '/');
+  }
+
+  static Uri? _parseBaseUri(String rawValue) {
+    final direct = Uri.tryParse(rawValue);
+    if (direct != null && direct.host.trim().isNotEmpty) {
+      return direct;
+    }
+
+    final withHttp = Uri.tryParse('http://$rawValue');
+    if (withHttp != null && withHttp.host.trim().isNotEmpty) {
+      return withHttp;
+    }
+
+    return null;
+  }
+
+  static String _normalizeApiPath(String rawPath) {
+    var path = rawPath.trim();
+    if (path.isEmpty) {
+      return '/api/v1';
+    }
+
+    if (!path.startsWith('/')) {
+      path = '/$path';
+    }
+
+    path = path.replaceAll(RegExp('/+'), '/');
+
+    final lower = path.toLowerCase();
+    final apiV1Index = lower.indexOf('/api/v1');
+    if (apiV1Index >= 0) {
+      final prefix = path
+          .substring(0, apiV1Index)
+          .replaceAll(RegExp(r'/+$'), '');
+      return '${prefix.isEmpty ? '' : prefix}/api/v1';
+    }
+
+    final apiVTypoIndex = lower.indexOf('/api/vl');
+    if (apiVTypoIndex >= 0) {
+      final prefix = path
+          .substring(0, apiVTypoIndex)
+          .replaceAll(RegExp(r'/+$'), '');
+      return '${prefix.isEmpty ? '' : prefix}/api/v1';
+    }
+
+    final apiSegmentIndex = lower.indexOf('/api/');
+    if (apiSegmentIndex >= 0) {
+      final prefix = path
+          .substring(0, apiSegmentIndex)
+          .replaceAll(RegExp(r'/+$'), '');
+      return '${prefix.isEmpty ? '' : prefix}/api/v1';
+    }
+
     if (lower.endsWith('/api')) {
-      return '$normalized/v1';
+      return '$path/v1';
     }
-    return '$normalized/api/v1';
+
+    path = path.replaceAll(RegExp(r'/+$'), '');
+    return '$path/api/v1';
   }
 
   static const String defaultDeviceName = String.fromEnvironment(

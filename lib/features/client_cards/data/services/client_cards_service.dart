@@ -1,6 +1,7 @@
 import '../../../../core/network/api_client.dart';
 import '../../../../core/services/token_storage_service.dart';
 import '../../domain/models/client_card.dart';
+import '../../domain/models/client_reward.dart';
 import '../../domain/models/ledger_entry.dart';
 
 class ClientCardsService {
@@ -36,17 +37,22 @@ class ClientCardsService {
     required int perPage,
   }) async {
     final token = await _tokenStorage.getToken();
+    final query = Uri(
+      queryParameters: <String, String>{
+        'membership_id': membershipId,
+        'page': '$page',
+        'per_page': '$perPage',
+      },
+    ).query;
+
     final response = await _apiClient.getJson(
-      '/client/me/ledger?membership_id=$membershipId&page=$page&per_page=$perPage',
+      '/client/me/ledger?$query',
       bearerToken: token,
     );
 
     final dynamic data = response['data'];
     if (data is! List) {
-      throw ApiClientException(
-        message: 'Invalid ledger payload.',
-        body: data,
-      );
+      throw ApiClientException(message: 'Invalid ledger payload.', body: data);
     }
 
     final entries = data
@@ -66,16 +72,61 @@ class ClientCardsService {
 
     return LedgerResult(entries: entries, pagination: pagination);
   }
+
+  Future<RewardsResult> getRewardsForMembership({
+    required String membershipId,
+  }) async {
+    final token = await _tokenStorage.getToken();
+    final query = Uri(
+      queryParameters: <String, String>{'membership_id': membershipId},
+    ).query;
+
+    final response = await _apiClient.getJson(
+      '/client/me/rewards?$query',
+      bearerToken: token,
+    );
+
+    final dynamic payload = response['data'];
+    if (payload is! Map<String, dynamic>) {
+      throw ApiClientException(
+        message: 'Invalid rewards payload.',
+        body: payload,
+      );
+    }
+
+    final rewardsPayload = payload['rewards'];
+    if (rewardsPayload is! List) {
+      throw ApiClientException(
+        message: 'Invalid rewards payload.',
+        body: payload,
+      );
+    }
+
+    final rewards = rewardsPayload
+        .whereType<Map>()
+        .map((map) => map.map((key, value) => MapEntry(key.toString(), value)))
+        .map((map) => ClientReward.fromJson(map))
+        .toList(growable: false);
+
+    return RewardsResult(
+      membershipId: (payload['membership_id'] ?? '').toString(),
+      rewards: rewards,
+    );
+  }
 }
 
 class LedgerResult {
-  const LedgerResult({
-    required this.entries,
-    this.pagination,
-  });
+  const LedgerResult({required this.entries, this.pagination});
 
   final List<LedgerEntry> entries;
   final PaginationMeta? pagination;
+}
+
+class RewardsResult {
+  const RewardsResult({required this.membershipId, required this.rewards});
+
+  final String membershipId;
+  final List<ClientReward> rewards;
 }
 
 class PaginationMeta {

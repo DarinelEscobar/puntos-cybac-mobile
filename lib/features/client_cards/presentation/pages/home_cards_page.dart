@@ -16,6 +16,10 @@ class HomeCardsPage extends StatefulWidget {
 }
 
 class _HomeCardsPageState extends State<HomeCardsPage> {
+  static const String _cardCreationHelpMessage =
+      'Para crear una tarjeta de esta compania, pide apoyo al cajero o al personal de la tienda. '
+      'Solo comparte tu numero o correo con el staff.';
+
   late Future<List<ClientCard>> _cardsFuture;
 
   @override
@@ -42,49 +46,51 @@ class _HomeCardsPageState extends State<HomeCardsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
-                          shape: BoxShape.circle,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.wallet, color: Theme.of(context).primaryColor),
                         ),
-                        child: Icon(Icons.wallet, color: Theme.of(context).primaryColor),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Mis Tarjetas',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          FutureBuilder<List<ClientCard>>(
-                            future: _cardsFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return Text(
-                                  '${snapshot.data!.length} tarjetas activas',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Mis Tarjetas',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            FutureBuilder<List<ClientCard>>(
+                              future: _cardsFuture,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Text(
+                                    '${snapshot.data!.length} tarjetas activas',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 12),
                   IconButton(
-                    onPressed: () {
-                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Agregar tarjeta: Próximamente")));
-                    },
+                    onPressed: () => _showCardCreationInfoModal(context),
+                    tooltip: 'Como obtener una tarjeta',
                     icon: const Icon(Icons.add),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
-                      side: BorderSide(color: Colors.grey[200]!),
+                      side: BorderSide(color: Colors.grey[300]!),
                     ),
                   ),
                 ],
@@ -126,6 +132,20 @@ class _HomeCardsPageState extends State<HomeCardsPage> {
                             icon: const Icon(Icons.refresh),
                             label: const Text('Actualizar'),
                           ),
+                          const SizedBox(height: 8),
+                          TextButton.icon(
+                            onPressed: () => _showCardCreationInfoModal(context),
+                            icon: const Icon(Icons.info_outline),
+                            label: const Text('Como obtengo una tarjeta?'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Text(
+                              'Consulta con staff en tienda para activarla.',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -138,13 +158,9 @@ class _HomeCardsPageState extends State<HomeCardsPage> {
                     },
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                      itemCount: cards.length + 1, // +1 for "Add new card" button at bottom
+                      itemCount: cards.length,
                       separatorBuilder: (context, index) => const SizedBox(height: 24),
                       itemBuilder: (context, index) {
-                        if (index == cards.length) {
-                           return _buildAddCardButton(context);
-                        }
-
                         final card = cards[index];
                         return Hero(
                           tag: 'card_${card.cardUid}',
@@ -174,38 +190,55 @@ class _HomeCardsPageState extends State<HomeCardsPage> {
     );
   }
 
-  Widget _buildAddCardButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Agregar tarjeta: Próximamente")));
-      },
-      child: Container(
-        height: 120,
-        margin: const EdgeInsets.only(bottom: 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey[300]!, style: BorderStyle.solid),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.add_card, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Agregar nueva tarjeta',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
+  Future<void> _showCardCreationInfoModal(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.info_outline, color: Colors.amber[800]),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Alta de tarjeta',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  _cardCreationHelpMessage,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: const Text('Entendido'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

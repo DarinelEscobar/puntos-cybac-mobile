@@ -193,6 +193,9 @@ class DigitalCard extends StatelessWidget {
   }
 
   Widget _buildBack(BuildContext context) {
+    final qrData = card.qrDataForDisplay;
+    final manualId = card.displayId;
+
     return Center(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -213,18 +216,22 @@ class DigitalCard extends StatelessWidget {
             SizedBox(
               width: 140,
               height: 140,
-              child: card.qrPayload.trim().isEmpty
+              child: qrData.isEmpty
                   ? const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.qr_code_2, color: Colors.grey),
                         SizedBox(height: 4),
-                        Text('QR vacío', style: TextStyle(fontSize: 10)),
+                        Text(
+                          'QR no disponible',
+                          style: TextStyle(fontSize: 10),
+                        ),
                       ],
                     )
                   : QrImageView(
-                      data: card.qrPayload,
+                      data: qrData,
                       size: 140,
+                      version: QrVersions.auto,
                       backgroundColor: Colors.white,
                       eyeStyle: const QrEyeStyle(
                         eyeShape: QrEyeShape.square,
@@ -234,7 +241,7 @@ class DigitalCard extends StatelessWidget {
                         dataModuleShape: QrDataModuleShape.square,
                         color: Colors.black,
                       ),
-                      errorCorrectionLevel: QrErrorCorrectLevel.M,
+                      errorCorrectionLevel: QrErrorCorrectLevel.L,
                       errorStateBuilder: (context, error) {
                         return const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -249,7 +256,7 @@ class DigitalCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              card.cardUid,
+              manualId.isEmpty ? 'ID NO DISPONIBLE' : manualId,
               style: const TextStyle(
                 color: Colors.black87,
                 fontWeight: FontWeight.bold,

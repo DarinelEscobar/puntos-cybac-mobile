@@ -16,16 +16,7 @@ class DigitalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final branding = card.branding;
-    final primaryColor = _hexToColor(
-      branding.colorPrimary,
-      const Color(0xFF195DE6),
-    );
-    final secondaryColor = _hexToColor(
-      branding.colorSecondary,
-      const Color(0xFF111621),
-    );
-    final accentColor = _hexToColor(branding.colorAccent, Colors.white);
+    final palette = _resolvePalette(card.branding);
 
     return GestureDetector(
       onTap: onTap,
@@ -34,13 +25,13 @@ class DigitalCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: LinearGradient(
-            colors: [primaryColor, secondaryColor],
+            colors: [palette.gradientStart, palette.gradientEnd],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withValues(alpha: 0.3),
+              color: palette.gradientStart.withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -54,7 +45,7 @@ class DigitalCard extends StatelessWidget {
               Positioned.fill(
                 child: CustomPaint(
                   painter: _PatternPainter(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: palette.onCardColor.withValues(alpha: 0.06),
                   ),
                 ),
               ),
@@ -62,7 +53,7 @@ class DigitalCard extends StatelessWidget {
                 padding: const EdgeInsets.all(24.0),
                 child: isBack
                     ? _buildBack(context)
-                    : _buildFront(context, accentColor),
+                    : _buildFront(context, palette),
               ),
             ],
           ),
@@ -71,59 +62,71 @@ class DigitalCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFront(BuildContext context, Color accentColor) {
+  Widget _buildFront(BuildContext context, _CardPalette palette) {
+    final textColor = palette.onCardColor;
+    final textColorMuted = textColor.withValues(alpha: 0.82);
+    final chipTextColor = _idealOnColor(palette.accentColor);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: textColor.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: textColor.withValues(alpha: 0.15),
+                      ),
+                      image: card.branding.logoUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(card.branding.logoUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    image: card.branding.logoUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(card.branding.logoUrl!),
-                            fit: BoxFit.cover,
-                          )
+                    child: card.branding.logoUrl == null
+                        ? Icon(Icons.local_cafe, color: textColor)
                         : null,
                   ),
-                  child: card.branding.logoUrl == null
-                      ? const Icon(Icons.local_cafe, color: Colors.white)
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  card.companyName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    letterSpacing: 0.5,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      card.companyName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(width: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.2),
+                color: palette.accentColor,
                 borderRadius: BorderRadius.circular(99),
-                border: Border.all(color: accentColor.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: chipTextColor.withValues(alpha: 0.12),
+                ),
               ),
               child: Text(
                 'MEMBER',
                 style: TextStyle(
-                  color: accentColor,
+                  color: chipTextColor,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
@@ -139,7 +142,7 @@ class DigitalCard extends StatelessWidget {
             Text(
               'Saldo actual',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: textColorMuted,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -151,8 +154,8 @@ class DigitalCard extends StatelessWidget {
               children: [
                 Text(
                   '${card.pointsBalance}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: textColor,
                     fontWeight: FontWeight.w800,
                     fontSize: 36,
                     height: 1.0,
@@ -162,7 +165,7 @@ class DigitalCard extends StatelessWidget {
                 Text(
                   'Puntos',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: textColor.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
@@ -178,14 +181,18 @@ class DigitalCard extends StatelessWidget {
             Text(
               _formatCardUid(card.cardUid),
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: textColor.withValues(alpha: 0.9),
                 fontFamily: 'Monospace',
                 letterSpacing: 2.5,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const Icon(Icons.contactless, color: Colors.white54, size: 32),
+            Icon(
+              Icons.contactless,
+              color: textColor.withValues(alpha: 0.55),
+              size: 32,
+            ),
           ],
         ),
       ],
@@ -324,19 +331,153 @@ class DigitalCard extends StatelessWidget {
     return uid;
   }
 
-  Color _hexToColor(String? hex, Color fallback) {
-    if (hex == null) return fallback;
-    var hexColor = hex.replaceAll('#', '').trim();
-    if (hexColor.length == 6) {
-      hexColor = 'FF$hexColor';
+  _CardPalette _resolvePalette(CardBranding branding) {
+    const defaultPrimary = Color(0xFF195DE6);
+    const defaultSecondary = Color(0xFF111621);
+    const defaultAccent = Color(0xFFF9C846);
+
+    final brandPrimary = _parseHexColor(branding.colorPrimary);
+    final brandSecondary = _parseHexColor(branding.colorSecondary);
+    final brandAccent = _parseHexColor(branding.colorAccent);
+
+    final gradientStart =
+        brandPrimary ?? brandSecondary ?? brandAccent ?? defaultPrimary;
+
+    Color gradientEnd;
+    if (brandSecondary != null) {
+      gradientEnd = _areColorsSimilar(gradientStart, brandSecondary)
+          ? _deriveCompanionColor(gradientStart)
+          : brandSecondary;
+    } else if (brandPrimary != null || brandAccent != null) {
+      gradientEnd = _deriveCompanionColor(gradientStart);
+    } else {
+      gradientEnd = defaultSecondary;
     }
-    try {
-      if (hexColor.length == 8) {
-        return Color(int.parse(hexColor, radix: 16));
-      }
-    } catch (_) {}
-    return fallback;
+
+    var accent =
+        brandAccent ??
+        brandSecondary ??
+        _deriveAccentColor(gradientStart, gradientEnd, fallback: defaultAccent);
+
+    if (_areColorsSimilar(accent, gradientStart) &&
+        _areColorsSimilar(accent, gradientEnd)) {
+      accent = _deriveAccentColor(
+        gradientStart,
+        gradientEnd,
+        fallback: defaultAccent,
+      );
+    }
+
+    final onCardColor = _idealOnColor(
+      _mixColors(gradientStart, gradientEnd, 0.5),
+    );
+
+    return _CardPalette(
+      gradientStart: gradientStart,
+      gradientEnd: gradientEnd,
+      accentColor: accent,
+      onCardColor: onCardColor,
+    );
   }
+
+  Color? _parseHexColor(String? hex) {
+    if (hex == null) return null;
+
+    var normalized = hex.replaceAll('#', '').trim();
+    if (normalized.isEmpty || normalized.toLowerCase() == 'null') {
+      return null;
+    }
+
+    if (normalized.length == 3 || normalized.length == 4) {
+      normalized = normalized
+          .split('')
+          .map((character) => '$character$character')
+          .join();
+    }
+
+    if (normalized.length == 6) {
+      normalized = 'FF$normalized';
+    }
+
+    if (normalized.length != 8) return null;
+
+    try {
+      return Color(int.parse(normalized, radix: 16));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Color _deriveCompanionColor(Color base) {
+    final hsl = HSLColor.fromColor(base);
+    final isLight = hsl.lightness > 0.55;
+    final adjustedLightness = isLight
+        ? (hsl.lightness - 0.2).clamp(0.0, 1.0)
+        : (hsl.lightness + 0.2).clamp(0.0, 1.0);
+
+    return hsl.withLightness(adjustedLightness).toColor();
+  }
+
+  Color _deriveAccentColor(Color start, Color end, {required Color fallback}) {
+    final base = _mixColors(start, end, 0.5);
+    final hsl = HSLColor.fromColor(base);
+    final shiftedHue = (hsl.hue + 35.0) % 360;
+    final saturation = (hsl.saturation + 0.35).clamp(0.45, 0.95);
+    final lightness = hsl.lightness > 0.55 ? 0.25 : 0.82;
+
+    final derived = hsl
+        .withHue(shiftedHue)
+        .withSaturation(saturation)
+        .withLightness(lightness)
+        .toColor();
+
+    if (_areColorsSimilar(derived, start) && _areColorsSimilar(derived, end)) {
+      return fallback;
+    }
+    return derived;
+  }
+
+  Color _mixColors(Color first, Color second, double ratio) {
+    final t = ratio.clamp(0.0, 1.0).toDouble();
+    return Color.lerp(first, second, t) ?? first;
+  }
+
+  bool _areColorsSimilar(Color first, Color second) {
+    final firstHsl = HSLColor.fromColor(first);
+    final secondHsl = HSLColor.fromColor(second);
+    final rawHueDifference = (firstHsl.hue - secondHsl.hue).abs();
+    final hueDifference = rawHueDifference > 180
+        ? 360 - rawHueDifference
+        : rawHueDifference;
+    final saturationDifference = (firstHsl.saturation - secondHsl.saturation)
+        .abs();
+    final lightnessDifference = (firstHsl.lightness - secondHsl.lightness)
+        .abs();
+
+    return hueDifference < 8 &&
+        saturationDifference < 0.08 &&
+        lightnessDifference < 0.08;
+  }
+
+  Color _idealOnColor(Color backgroundColor) {
+    return backgroundColor.computeLuminance() < 0.45
+        ? Colors.white
+        : const Color(0xFF0F172A);
+  }
+}
+
+class _CardPalette {
+  const _CardPalette({
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.accentColor,
+    required this.onCardColor,
+  });
+
+  final Color gradientStart;
+  final Color gradientEnd;
+  final Color accentColor;
+  final Color onCardColor;
 }
 
 class _PatternPainter extends CustomPainter {

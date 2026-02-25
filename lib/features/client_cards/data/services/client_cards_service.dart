@@ -6,9 +6,25 @@ class ClientCardsService {
 
   final ApiClient _apiClient;
 
+  String? _cachedToken;
+  List<ClientCard>? _cachedCards;
+  DateTime? _lastFetchTime;
+  static const _cacheDuration = Duration(minutes: 5);
+
   Future<List<ClientCard>> getMyCards({
     required String accessToken,
+    bool forceRefresh = false,
   }) async {
+    final isSameToken = accessToken == _cachedToken;
+
+    if (!forceRefresh &&
+        isSameToken &&
+        _cachedCards != null &&
+        _lastFetchTime != null &&
+        DateTime.now().difference(_lastFetchTime!) < _cacheDuration) {
+      return _cachedCards!;
+    }
+
     final response = await _apiClient.getJson(
       '/client/me/cards',
       bearerToken: accessToken,
@@ -22,9 +38,13 @@ class ClientCardsService {
       );
     }
 
-    return payload
+    _cachedCards = payload
         .whereType<Map<String, dynamic>>()
         .map(ClientCard.fromJson)
         .toList(growable: false);
+    _cachedToken = accessToken;
+    _lastFetchTime = DateTime.now();
+
+    return _cachedCards!;
   }
 }

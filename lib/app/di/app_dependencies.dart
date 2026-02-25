@@ -35,9 +35,6 @@ class AppDependencies {
 
   factory AppDependencies.create() {
     final apiBaseUrl = AppConstants.apiBaseUrl;
-    if (apiBaseUrl.isEmpty) {
-      throw ArgumentError('API_BASE_URL is not set.');
-    }
     if (kReleaseMode && !apiBaseUrl.startsWith('https://')) {
       throw ArgumentError('API_BASE_URL must use HTTPS in release mode.');
     }

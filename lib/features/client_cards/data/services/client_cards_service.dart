@@ -31,46 +31,44 @@ class ClientCardsService {
         .toList(growable: false);
   }
 
-  Future<LedgerResult> getLedger({
+  Future<List<LedgerEntry>> getLatestLedger({
     required String membershipId,
-    required int page,
-    required int perPage,
+    int limit = 10,
   }) async {
     final token = await _tokenStorage.getToken();
     final query = Uri(
       queryParameters: <String, String>{
         'membership_id': membershipId,
-        'page': '$page',
-        'per_page': '$perPage',
+        'limit': '$limit',
       },
     ).query;
 
     final response = await _apiClient.getJson(
-      '/client/me/ledger?$query',
+      '/client/me/ledger/latest?$query',
       bearerToken: token,
     );
 
-    final dynamic data = response['data'];
-    if (data is! List) {
-      throw ApiClientException(message: 'Invalid ledger payload.', body: data);
+    final dynamic payload = response['data'];
+    if (payload is! Map<String, dynamic>) {
+      throw ApiClientException(
+        message: 'Invalid ledger payload.',
+        body: payload,
+      );
     }
 
-    final entries = data
+    final entriesPayload = payload['entries'];
+    if (entriesPayload is! List) {
+      throw ApiClientException(
+        message: 'Invalid ledger payload.',
+        body: payload,
+      );
+    }
+
+    return entriesPayload
         .whereType<Map>()
         .map((map) => map.map((key, value) => MapEntry(key.toString(), value)))
         .map((map) => LedgerEntry.fromJson(map))
         .toList(growable: false);
-
-    final meta = response['meta'];
-    PaginationMeta? pagination;
-    if (meta is Map<String, dynamic>) {
-      final p = meta['pagination'];
-      if (p is Map<String, dynamic>) {
-        pagination = PaginationMeta.fromJson(p);
-      }
-    }
-
-    return LedgerResult(entries: entries, pagination: pagination);
   }
 
   Future<RewardsResult> getRewardsForMembership({
@@ -115,52 +113,9 @@ class ClientCardsService {
   }
 }
 
-class LedgerResult {
-  const LedgerResult({required this.entries, this.pagination});
-
-  final List<LedgerEntry> entries;
-  final PaginationMeta? pagination;
-}
-
 class RewardsResult {
   const RewardsResult({required this.membershipId, required this.rewards});
 
   final String membershipId;
   final List<ClientReward> rewards;
-}
-
-class PaginationMeta {
-  const PaginationMeta({
-    required this.total,
-    required this.count,
-    required this.perPage,
-    required this.currentPage,
-    required this.totalPages,
-  });
-
-  final int total;
-  final int count;
-  final int perPage;
-  final int currentPage;
-  final int totalPages;
-
-  factory PaginationMeta.fromJson(Map<String, dynamic> json) {
-    return PaginationMeta(
-      total: _asInt(json['total']),
-      count: _asInt(json['count']),
-      perPage: _asInt(json['per_page']),
-      currentPage: _asInt(json['current_page']),
-      totalPages: _asInt(json['total_pages']),
-    );
-  }
-
-  static int _asInt(dynamic value) {
-    if (value is int) {
-      return value;
-    }
-    if (value is String) {
-      return int.tryParse(value) ?? 0;
-    }
-    return 0;
-  }
 }

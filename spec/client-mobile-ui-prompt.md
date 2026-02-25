@@ -10,7 +10,7 @@ Incluye:
 - Sesion persistente en telefono.
 - Vista de tarjetas digitales (una por membership/empresa).
 - Lista principal de cards con informacion esencial y minima (sin saturacion visual).
-- Detalle de tarjeta con secciones por card: historial y rewards de esa company.
+- Detalle de tarjeta con secciones por card: ultimos movimientos y rewards de esa company.
 - Tarjeta reversible (frente/reverso) para mostrar QR en el reverso.
 - Perfil basico de cliente (solo lectura).
 - Estados UX: loading, vacio, error, sin conexion, sesion expirada.
@@ -32,7 +32,7 @@ No incluye:
   - `Tarjetas` (principal)
   - `Profile`
 - Flujo desde `HomeCards`:
-  - Tap en card -> `CardDetail` (incluye historial y rewards filtrados por esa tarjeta)
+  - Tap en card -> `CardDetail` (incluye ultimos movimientos y rewards filtrados por esa tarjeta)
 
 ## 3) Pantallas y contenido minimo
 
@@ -82,8 +82,8 @@ Estados:
 - Empty: "Aun no tienes tarjetas activas".
 - Error de red con retry.
 
-### D. CardDetail (detalle + movimientos)
-Objetivo: mostrar la tarjeta seleccionada y su historial de movimientos.
+### D. CardDetail (detalle + ultimos movimientos)
+Objetivo: mostrar la tarjeta seleccionada y sus ultimos movimientos esenciales.
 
 Componentes:
 - Card grande con frente/reverso.
@@ -95,15 +95,15 @@ Componentes:
   - QR principal (payload = `qr_payload`)
   - `card_uid` para fallback manual
 - Boton/gesto `Voltear tarjeta` con animacion de flip.
-- Seccion "Movimientos de esta tarjeta" debajo de la card:
-- Selector de seccion `Historial | Rewards` debajo de la card.
-- Seccion "Movimientos de esta tarjeta":
+- Seccion "Ultimos movimientos de esta tarjeta" debajo de la card.
+- Selector de seccion `Ultimos movimientos | Rewards` debajo de la card.
+- Seccion "Ultimos movimientos de esta tarjeta":
   - lista newest-first
   - tipo (`EARN`, `REDEEM`, `ADJUST`)
   - `points_delta`
   - fecha/hora
   - nota opcional
-  - paginacion/infinite scroll
+  - sin paginacion (lista corta optimizada)
 - Seccion "Rewards de esta tarjeta":
   - lista de rewards activas de la misma company
   - `name`, `type`, `points_cost`
@@ -111,8 +111,8 @@ Componentes:
 
 Estados:
 - Loading inicial de detalle.
-- Loading incremental de movimientos.
-- Empty movimientos: "Aun no tienes movimientos en esta tarjeta".
+- Loading de ultimos movimientos.
+- Empty movimientos: "Aun no tienes movimientos recientes en esta tarjeta".
 - Si membership no pertenece al cliente (`MEMBERSHIP_NOT_OWNED`): bloquear vista + volver a tarjetas.
 
 ### E. Profile
@@ -157,7 +157,7 @@ Usar estos endpoints para poblar UI:
 - `GET /api/v1/client/me/profile`
 - `GET /api/v1/client/me/cards`
 - `GET /api/v1/client/me/rewards`
-- `GET /api/v1/client/me/ledger`
+- `GET /api/v1/client/me/ledger/latest`
 
 Documento de referencia del contrato:
 - `docs/client-api.md`
@@ -202,9 +202,9 @@ UI a mostrar:
 - HomeCards (solo datos esenciales: company_name, points_balance, card_uid corto, branding).
 - CardDetail (datos completos + QR en reverso).
 
-### 6.4 `GET /api/v1/client/me/ledger`
+### 6.4 `GET /api/v1/client/me/ledger/latest`
 Query recomendada para detalle por tarjeta:
-- `membership_id=<id>&page=1&per_page=25`
+- `membership_id=<id>&limit=10`
 
 ### 6.5 `GET /api/v1/client/me/rewards`
 Query requerida para detalle por tarjeta:
@@ -228,9 +228,9 @@ Datos clave por movimiento:
 - `created_at`
 
 UI a mostrar:
-- Lista de movimientos en `CardDetail`.
+- Lista de ultimos movimientos en `CardDetail`.
 - Orden newest-first.
-- Paginacion con `meta.pagination`.
+- Sin paginacion en mobile.
 
 ## 7) Prompt maestro (copiar/pegar)
 
@@ -244,7 +244,7 @@ Contexto funcional:
 - El cliente entra por magic-link (token, 24h, single-use).
 - Tras autenticarse, ve sus tarjetas digitales por empresa.
 - La lista principal de tarjetas debe ser simple y minimalista, mostrando solo informacion esencial.
-- Al tocar una tarjeta, se abre detalle con historial de movimientos de esa tarjeta.
+- Al tocar una tarjeta, se abre detalle con ultimos movimientos de esa tarjeta.
 - La tarjeta del detalle debe poder voltearse (frente/reverso) para mostrar QR en el reverso.
 - Puede ver perfil basico y cerrar sesion.
 - Redencion en MVP es verbal en caja; no hay flujo de aprobacion en app.
@@ -256,20 +256,20 @@ Pantallas obligatorias:
 1) MagicLinkEntry
 2) SessionBootstrap
 3) HomeCards (principal)
-4) CardDetail (incluye movimientos y flip para QR)
+4) CardDetail (incluye ultimos movimientos, rewards y flip para QR)
 5) Profile
 
 Endpoints disponibles:
 - POST /api/v1/auth/client/magic-links/consume
 - GET /api/v1/client/me/profile
 - GET /api/v1/client/me/cards
-- GET /api/v1/client/me/ledger
+- GET /api/v1/client/me/ledger/latest
 
 Mapeo de datos a UI:
 - cards[]: HomeCards + CardDetail
 - qr_payload: reverso de card (QR)
 - points_balance: saldo visible
-- ledger data: lista de movimientos newest-first
+- ledger data: lista de ultimos movimientos newest-first
 - profile.client_identity: pantalla Profile
 
 Requisitos UX:
@@ -303,7 +303,7 @@ Restriccion:
 
 - Existe flujo completo de magic-link a home sin pasos admin.
 - HomeCards muestra solo informacion esencial (sin saturacion).
-- Tap en card abre detalle con historial filtrado por membership.
+- Tap en card abre detalle con ultimos movimientos filtrados por membership.
 - CardDetail permite voltear la tarjeta y ver QR en reverso.
 - El cliente puede mostrar QR e ID manual en caja.
 - Todos los errores definidos tienen mensaje UX y accion.

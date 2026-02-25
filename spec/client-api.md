@@ -13,7 +13,7 @@ Esta guía resume el contrato cliente para implementar la app móvil Flutter sin
   - `GET /client/me/profile`
   - `GET /client/me/cards`
   - `GET /client/me/rewards`
-  - `GET /client/me/ledger`
+  - `GET /client/me/ledger/latest`
 
 ## Autenticación (MVP)
 
@@ -280,41 +280,42 @@ Si `membership_id` es inválido o no viene:
 }
 ```
 
-### 5) Ledger filtrado por membresía
+### 5) Ultimos movimientos por tarjeta (optimizado)
 
-`GET /client/me/ledger?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&page=1&per_page=25`
+`GET /client/me/ledger/latest?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&limit=10`
 
 Response `200` (ordenado newest first):
 
 ```json
 {
   "status": "success",
-  "message": "Client ledger fetched.",
-  "data": [
-    {
-      "id": "3b9f5d26-4b12-4a78-bd50-92c9ca611111",
-      "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
-      "actor_user_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-      "type": "EARN",
-      "points_delta": 30,
-      "purchase_amount_mxn": 450,
-      "reward_id": null,
-      "note": "Ticket #A-120",
-      "related_entry_id": null,
-      "created_at": "2026-02-16T09:30:00Z"
-    }
-  ],
+  "message": "Client latest ledger fetched.",
+  "data": {
+    "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "limit": 10,
+    "entries": [
+      {
+        "id": "3b9f5d26-4b12-4a78-bd50-92c9ca611111",
+        "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+        "type": "EARN",
+        "points_delta": 30,
+        "note": "Ticket #A-120",
+        "created_at": "2026-02-16T09:30:00Z"
+      },
+      {
+        "id": "9f8ce55f-f09e-4486-aa26-2ec892222222",
+        "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+        "type": "REDEEM",
+        "points_delta": -20,
+        "note": "Reward redeem",
+        "created_at": "2026-02-15T19:10:00Z"
+      }
+    ]
+  },
   "meta": {
     "timestamp": "2026-02-16T10:23:00Z",
-    "path": "api/v1/client/me/ledger?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&page=1&per_page=25",
-    "version": "v1",
-    "pagination": {
-      "total": 2,
-      "count": 1,
-      "per_page": 25,
-      "current_page": 1,
-      "total_pages": 1
-    }
+    "path": "api/v1/client/me/ledger/latest?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&limit=10",
+    "version": "v1"
   }
 }
 ```
@@ -328,57 +329,6 @@ Si `membership_id` no pertenece al cliente autenticado:
     "message": "The selected membership does not belong to the authenticated client.",
     "details": {
       "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff"
-    }
-  }
-}
-```
-
-### 6) Ledger combinado (sin filtro)
-
-`GET /client/me/ledger?page=1&per_page=25`
-
-Response `200` (combina todas las memberships, newest first):
-
-```json
-{
-  "status": "success",
-  "message": "Client ledger fetched.",
-  "data": [
-    {
-      "id": "3b9f5d26-4b12-4a78-bd50-92c9ca611111",
-      "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
-      "actor_user_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-      "type": "EARN",
-      "points_delta": 30,
-      "purchase_amount_mxn": 450,
-      "reward_id": null,
-      "note": "Ticket #A-120",
-      "related_entry_id": null,
-      "created_at": "2026-02-16T09:30:00Z"
-    },
-    {
-      "id": "32196ac2-244a-4487-b4be-4f2013333333",
-      "membership_id": "11111111-1111-4111-8111-111111111111",
-      "actor_user_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-      "type": "EARN",
-      "points_delta": 15,
-      "purchase_amount_mxn": 220,
-      "reward_id": null,
-      "note": "Ticket #B-905",
-      "related_entry_id": null,
-      "created_at": "2026-02-16T08:50:00Z"
-    }
-  ],
-  "meta": {
-    "timestamp": "2026-02-16T10:23:30Z",
-    "path": "api/v1/client/me/ledger?page=1&per_page=25",
-    "version": "v1",
-    "pagination": {
-      "total": 14,
-      "count": 2,
-      "per_page": 25,
-      "current_page": 1,
-      "total_pages": 1
     }
   }
 }
@@ -400,13 +350,11 @@ Response `200` (combina todas las memberships, newest first):
 - `MAGIC_LINK_ALREADY_CONSUMED`: “Este enlace ya fue usado.”
 - `MAGIC_LINK_EXPIRED`: “Este enlace expiró. Solicita uno nuevo.”
 
-### Paginación de ledger
+### Ultimos movimientos (sin paginación en mobile)
 
-- Estilo MVP: `page` + `per_page`.
-- Estrategia recomendada:
-  - iniciar `page=1`, `per_page=25`;
-  - append en scroll infinito;
-  - detener cuando `current_page >= total_pages`.
+- Endpoint recomendado: `GET /client/me/ledger/latest`.
+- Enviar `membership_id` y usar `limit` corto (ej. 10) para rendimiento.
+- La UI muestra solo lista de últimos movimientos esenciales.
 
 ## Tabla resumen
 
@@ -416,7 +364,7 @@ Response `200` (combina todas las memberships, newest first):
 | `GET /client/me/profile` | Traer perfil + memberships del cliente | Sí | `401` |
 | `GET /client/me/cards` | Traer cards con `points_balance` + branding embebido | Sí | `401` |
 | `GET /client/me/rewards` | Traer rewards activas de la company de una tarjeta (`membership_id`) | Sí | `400`, `401`, `403` |
-| `GET /client/me/ledger` | Historial append-only de puntos (todas o una membership) | Sí | `401`, `403` |
+| `GET /client/me/ledger/latest` | Ultimos movimientos esenciales por tarjeta (`membership_id`) | Sí | `400`, `401`, `403` |
 
 ## Contrato fuera de MVP (no usar)
 

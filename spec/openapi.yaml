@@ -257,24 +257,23 @@ paths:
         '403':
           $ref: '#/components/responses/ClientMembershipForbidden'
 
-  /client/me/ledger:
+  /client/me/ledger/latest:
     get:
       tags:
         - Client App
-      summary: Historial ledger del cliente
+      summary: Ultimos movimientos esenciales por tarjeta
       description: >
-        Retorna movimientos append-only ordenados del más reciente al más antiguo.
-        Si se envía `membership_id`, debe pertenecer al cliente autenticado.
-      operationId: clientLedgerHistory
+        Retorna solo los ultimos movimientos esenciales de la membership seleccionada
+        para optimizar rendimiento en mobile.
+      operationId: clientLatestLedgerByMembership
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PerPage'
-        - $ref: '#/components/parameters/MembershipIdQuery'
+        - $ref: '#/components/parameters/MembershipIdRequiredQuery'
+        - $ref: '#/components/parameters/LatestLimitQuery'
       responses:
         '200':
-          description: Movimientos del cliente.
+          description: Ultimos movimientos de la membership solicitada.
           content:
             application/json:
               schema:
@@ -283,79 +282,32 @@ paths:
                   - type: object
                     properties:
                       data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/LedgerEntry'
-                      meta:
-                        allOf:
-                          - $ref: '#/components/schemas/ApiMeta'
-                          - type: object
-                            properties:
-                              pagination:
-                                $ref: '#/components/schemas/PaginationMeta'
-              examples:
-                filteredMembership:
-                  summary: Filtrado por membership_id
-                  value:
-                    status: success
-                    message: Client ledger fetched.
-                    data:
-                      - id: 3b9f5d26-4b12-4a78-bd50-92c9ca611111
-                        membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
-                        actor_user_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
-                        type: EARN
-                        points_delta: 30
-                        purchase_amount_mxn: 450
-                        reward_id: null
-                        note: Ticket #A-120
-                        related_entry_id: null
-                        created_at: '2026-02-16T09:30:00Z'
-                    meta:
-                      timestamp: '2026-02-16T10:23:00Z'
-                      path: api/v1/client/me/ledger?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&page=1&per_page=25
-                      version: v1
-                      pagination:
-                        total: 2
-                        count: 1
-                        per_page: 25
-                        current_page: 1
-                        total_pages: 1
-                combinedMemberships:
-                  summary: Combinado sin filtro membership_id
-                  value:
-                    status: success
-                    message: Client ledger fetched.
-                    data:
-                      - id: 3b9f5d26-4b12-4a78-bd50-92c9ca611111
-                        membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
-                        actor_user_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
-                        type: EARN
-                        points_delta: 30
-                        purchase_amount_mxn: 450
-                        reward_id: null
-                        note: Ticket #A-120
-                        related_entry_id: null
-                        created_at: '2026-02-16T09:30:00Z'
-                      - id: 32196ac2-244a-4487-b4be-4f2013333333
-                        membership_id: 11111111-1111-4111-8111-111111111111
-                        actor_user_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
-                        type: EARN
-                        points_delta: 15
-                        purchase_amount_mxn: 220
-                        reward_id: null
-                        note: Ticket #B-905
-                        related_entry_id: null
-                        created_at: '2026-02-16T08:50:00Z'
-                    meta:
-                      timestamp: '2026-02-16T10:23:30Z'
-                      path: api/v1/client/me/ledger?page=1&per_page=25
-                      version: v1
-                      pagination:
-                        total: 14
-                        count: 2
-                        per_page: 25
-                        current_page: 1
-                        total_pages: 1
+                        $ref: '#/components/schemas/ClientLatestLedger'
+              example:
+                status: success
+                message: Client latest ledger fetched.
+                data:
+                  membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
+                  limit: 10
+                  entries:
+                    - id: 3b9f5d26-4b12-4a78-bd50-92c9ca611111
+                      membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
+                      type: EARN
+                      points_delta: 30
+                      note: Ticket #A-120
+                      created_at: '2026-02-16T09:30:00Z'
+                    - id: 9f8ce55f-f09e-4486-aa26-2ec892222222
+                      membership_id: ffffffff-ffff-4fff-8fff-ffffffffffff
+                      type: REDEEM
+                      points_delta: -20
+                      note: Reward redeem
+                      created_at: '2026-02-15T19:10:00Z'
+                meta:
+                  timestamp: '2026-02-16T10:23:00Z'
+                  path: api/v1/client/me/ledger/latest?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff&limit=10
+                  version: v1
+        '400':
+          $ref: '#/components/responses/ClientInvalidQueryParams'
         '401':
           $ref: '#/components/responses/ClientUnauthenticated'
         '403':
@@ -399,11 +351,21 @@ components:
     MembershipIdRequiredQuery:
       name: membership_id
       in: query
-      description: UUID de membership para cargar rewards de esa tarjeta.
+      description: UUID de membership para cargar datos de una tarjeta específica.
       required: true
       schema:
         type: string
         format: uuid
+    LatestLimitQuery:
+      name: limit
+      in: query
+      description: Cantidad máxima de movimientos recientes a retornar.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+        default: 10
 
   responses:
     ClientUnauthenticated:
@@ -737,6 +699,56 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Reward'
+
+    ClientLatestLedger:
+      type: object
+      required:
+        - membership_id
+        - limit
+        - entries
+      properties:
+        membership_id:
+          type: string
+          format: uuid
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientLatestLedgerEntry'
+
+    ClientLatestLedgerEntry:
+      type: object
+      required:
+        - id
+        - membership_id
+        - type
+        - points_delta
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        membership_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - EARN
+            - REDEEM
+            - ADJUST
+            - REVERSE
+        points_delta:
+          type: integer
+        note:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
 
     ClientSessionPayload:
       type: object

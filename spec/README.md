@@ -20,7 +20,7 @@ Estos archivos son la fuente de verdad para el contrato API de cliente móvil:
 - `GET /api/v1/client/me/profile`
 - `GET /api/v1/client/me/cards`
 - `GET /api/v1/client/me/rewards`
-- `GET /api/v1/client/me/ledger`
+- `GET /api/v1/client/me/ledger/latest`
 
 ## Archivos
 

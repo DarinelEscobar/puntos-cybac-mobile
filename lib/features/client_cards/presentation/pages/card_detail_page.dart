@@ -39,9 +39,6 @@ class _CardDetailPageState extends State<CardDetailPage>
   final List<LedgerEntry> _ledgerEntries = [];
   bool _isLoadingLedger = false;
   String? _ledgerError;
-  int _page = 1;
-  bool _hasMore = true;
-  final ScrollController _scrollController = ScrollController();
 
   final List<ClientReward> _rewards = [];
   bool _isLoadingRewards = false;
@@ -63,13 +60,11 @@ class _CardDetailPageState extends State<CardDetailPage>
 
     _loadLedger();
     _loadRewards();
-    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _flipController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -83,11 +78,9 @@ class _CardDetailPageState extends State<CardDetailPage>
   }
 
   Future<void> _loadLedger({bool refresh = false}) async {
-    if (_isLoadingLedger || (!_hasMore && !refresh)) return;
+    if (_isLoadingLedger) return;
 
     if (refresh) {
-      _page = 1;
-      _hasMore = true;
       _ledgerEntries.clear();
       _ledgerError = null;
     }
@@ -97,17 +90,16 @@ class _CardDetailPageState extends State<CardDetailPage>
     });
 
     try {
-      final result = await _getLedger(
+      final latestEntries = await _getLedger(
         membershipId: widget.card.membershipId,
-        page: _page,
-        perPage: 25,
+        limit: 10,
       );
 
       if (mounted) {
         setState(() {
-          _ledgerEntries.addAll(result.entries);
-          _hasMore = result.entries.length >= 25;
-          if (_hasMore) _page++;
+          _ledgerEntries
+            ..clear()
+            ..addAll(latestEntries);
           _isLoadingLedger = false;
         });
       }
@@ -118,7 +110,7 @@ class _CardDetailPageState extends State<CardDetailPage>
           if (e.errorCode == 'MEMBERSHIP_NOT_OWNED') {
             _ledgerError = 'No tienes acceso a esta membresia.';
           } else {
-            _ledgerError = 'Error al cargar movimientos: ${e.message}';
+            _ledgerError = 'Error al cargar ultimos movimientos: ${e.message}';
           }
         });
       }
@@ -180,14 +172,6 @@ class _CardDetailPageState extends State<CardDetailPage>
     }
   }
 
-  void _onScroll() {
-    if (_section != _CardDetailSection.ledger) return;
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      _loadLedger();
-    }
-  }
-
   Future<void> _refreshCurrentSection() {
     if (_section == _CardDetailSection.ledger) {
       return _loadLedger(refresh: true);
@@ -241,7 +225,6 @@ class _CardDetailPageState extends State<CardDetailPage>
               child: RefreshIndicator(
                 onRefresh: _refreshCurrentSection,
                 child: ListView(
-                  controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   children: [
                     Center(
@@ -288,7 +271,7 @@ class _CardDetailPageState extends State<CardDetailPage>
                       children: [
                         Expanded(
                           child: _buildSectionButton(
-                            label: 'Historial',
+                            label: 'Ultimos movimientos',
                             icon: Icons.receipt_long,
                             isSelected: _section == _CardDetailSection.ledger,
                             onTap: () =>
@@ -348,13 +331,18 @@ class _CardDetailPageState extends State<CardDetailPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Movimientos',
+          'Ultimos movimientos',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        if (_ledgerError != null)
+        if (_isLoadingLedger && _ledgerEntries.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Loader(),
+          )
+        else if (_ledgerError != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: ErrorView(
@@ -367,7 +355,7 @@ class _CardDetailPageState extends State<CardDetailPage>
             padding: const EdgeInsets.symmetric(vertical: 48),
             child: Center(
               child: Text(
-                'Aun no tienes movimientos en esta tarjeta.',
+                'Aun no tienes movimientos recientes en esta tarjeta.',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
@@ -378,17 +366,10 @@ class _CardDetailPageState extends State<CardDetailPage>
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _ledgerEntries.length + (_isLoadingLedger ? 1 : 0),
+            itemCount: _ledgerEntries.length,
             separatorBuilder: (context, index) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              if (index == _ledgerEntries.length) {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Loader(),
-                );
-              }
-              return _buildLedgerItem(_ledgerEntries[index]);
-            },
+            itemBuilder: (context, index) =>
+                _buildLedgerItem(_ledgerEntries[index]),
           ),
       ],
     );

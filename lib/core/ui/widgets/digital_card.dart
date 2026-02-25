@@ -194,80 +194,126 @@ class DigitalCard extends StatelessWidget {
 
   Widget _buildBack(BuildContext context) {
     final qrData = card.qrDataForDisplay;
-    final manualId = card.displayId;
+    final manualId = card.displayId.isEmpty
+        ? 'ID NO DISPONIBLE'
+        : card.displayId;
+    final isLongManualId = manualId.length > 18;
+    final idStyle = TextStyle(
+      color: Colors.black87,
+      fontWeight: FontWeight.bold,
+      letterSpacing: isLongManualId ? 0.8 : 1.5,
+      fontFamily: 'Monospace',
+      fontSize: isLongManualId ? 14 : 16,
+    );
+    const idTextScaler = TextScaler.noScaling;
 
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const containerVerticalPadding = 8.0;
+        const idSpacing = 10.0;
+        const maxQrSize = 132.0;
+        const layoutSafetyPx = 6.0;
+        final idTextWidth = (constraints.maxWidth - 92.0)
+            .clamp(132.0, 180.0)
+            .toDouble();
+        final idBoxHeight = isLongManualId ? 20.0 : 22.0;
+
+        final qrSize = constraints.maxHeight.isFinite
+            ? (constraints.maxHeight -
+                      (containerVerticalPadding * 2) -
+                      idSpacing -
+                      idBoxHeight -
+                      layoutSafetyPx)
+                  .clamp(0.0, maxQrSize)
+                  .toDouble()
+            : maxQrSize;
+
+        return Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: containerVerticalPadding,
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 140,
-              height: 140,
-              child: qrData.isEmpty
-                  ? const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.qr_code_2, color: Colors.grey),
-                        SizedBox(height: 4),
-                        Text(
-                          'QR no disponible',
-                          style: TextStyle(fontSize: 10),
-                        ),
-                      ],
-                    )
-                  : QrImageView(
-                      data: qrData,
-                      size: 140,
-                      version: QrVersions.auto,
-                      backgroundColor: Colors.white,
-                      eyeStyle: const QrEyeStyle(
-                        eyeShape: QrEyeShape.square,
-                        color: Colors.black,
-                      ),
-                      dataModuleStyle: const QrDataModuleStyle(
-                        dataModuleShape: QrDataModuleShape.square,
-                        color: Colors.black,
-                      ),
-                      errorCorrectionLevel: QrErrorCorrectLevel.L,
-                      errorStateBuilder: (context, error) {
-                        return const Column(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: qrSize,
+                  height: qrSize,
+                  child: qrData.isEmpty
+                      ? const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.error, color: Colors.grey),
+                            Icon(Icons.qr_code_2, color: Colors.grey),
                             SizedBox(height: 4),
-                            Text('Error QR', style: TextStyle(fontSize: 10)),
+                            Text(
+                              'QR no disponible',
+                              style: TextStyle(fontSize: 10),
+                            ),
                           ],
-                        );
-                      },
+                        )
+                      : QrImageView(
+                          data: qrData,
+                          size: qrSize,
+                          version: QrVersions.auto,
+                          backgroundColor: Colors.white,
+                          eyeStyle: const QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: Colors.black,
+                          ),
+                          dataModuleStyle: const QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: Colors.black,
+                          ),
+                          errorCorrectionLevel: QrErrorCorrectLevel.L,
+                          errorStateBuilder: (context, error) {
+                            return const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.error, color: Colors.grey),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Error QR',
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                ),
+                const SizedBox(height: idSpacing),
+                SizedBox(
+                  width: idTextWidth,
+                  height: idBoxHeight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Text(
+                      manualId,
+                      maxLines: 1,
+                      softWrap: false,
+                      textAlign: TextAlign.center,
+                      textScaler: idTextScaler,
+                      style: idStyle,
                     ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              manualId.isEmpty ? 'ID NO DISPONIBLE' : manualId,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
-                fontFamily: 'Monospace',
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

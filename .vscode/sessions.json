@@ -16,7 +16,7 @@
           "$env:ANDROID_SDK_ROOT='C:\\Android'",
           "$env:Path='C:\\src\\flutter\\bin;C:\\Android\\platform-tools;' + $env:Path",
           "adb start-server",
-          "C:\\Android\\emulator\\emulator.exe -avd Pixel_7_API_34 -netdelay none -netspeed full -no-snapshot"
+          "Start-Process -FilePath 'C:\\Android\\emulator\\emulator.exe' -ArgumentList '-avd Pixel_7_API_34 -netdelay none -netspeed full -no-snapshot' -NoNewWindow"
         ]
       },
       {
@@ -28,7 +28,9 @@
         "commands": [
           "$env:ANDROID_SDK_ROOT='C:\\Android'",
           "$env:Path='C:\\src\\flutter\\bin;C:\\Android\\platform-tools;' + $env:Path",
-          "adb wait-for-device",
+          "# wait up to 120s for emulator to appear in adb",
+          "for ($i=0; $i -lt 60; $i++) { if ((adb devices) -match 'emulator-') { Write-Host 'Emulator detected'; break } ; Write-Host \"Waiting for emulator... ($i)\" ; Start-Sleep -Seconds 2 }",
+          "adb devices -l",
           "flutter devices --device-timeout 60",
           "flutter run -d emulator-5554"
         ]

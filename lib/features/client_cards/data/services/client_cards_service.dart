@@ -8,9 +8,22 @@ class ClientCardsService {
 
   final ApiClient _apiClient;
   final TokenStorageService _tokenStorage;
+  String? _cachedToken;
+  List<ClientCard>? _cachedCards;
+  DateTime? _lastFetchTime;
+  static const _cacheDuration = Duration(minutes: 5);
 
-  Future<List<ClientCard>> getMyCards() async {
+  Future<List<ClientCard>> getMyCards({bool forceRefresh = false}) async {
     final token = await _tokenStorage.getToken();
+    final isSameToken = token == _cachedToken;
+
+    if (!forceRefresh &&
+        isSameToken &&
+        _cachedCards != null &&
+        _lastFetchTime != null &&
+        DateTime.now().difference(_lastFetchTime!) < _cacheDuration) {
+      return _cachedCards!;
+    }
     final response = await _apiClient.getJson(
       '/client/me/cards',
       bearerToken: token,
@@ -24,10 +37,14 @@ class ClientCardsService {
       );
     }
 
-    return payload
+    _cachedCards = payload
         .whereType<Map<String, dynamic>>()
         .map(ClientCard.fromJson)
         .toList(growable: false);
+    _cachedToken = token;
+    _lastFetchTime = DateTime.now();
+
+    return _cachedCards!;
   }
 
   Future<LedgerResult> getLedger({
@@ -43,10 +60,7 @@ class ClientCardsService {
 
     final dynamic data = response['data'];
     if (data is! List) {
-      throw ApiClientException(
-        message: 'Invalid ledger payload.',
-        body: data,
-      );
+      throw ApiClientException(message: 'Invalid ledger payload.', body: data);
     }
 
     final entries = data
@@ -69,10 +83,7 @@ class ClientCardsService {
 }
 
 class LedgerResult {
-  const LedgerResult({
-    required this.entries,
-    this.pagination,
-  });
+  const LedgerResult({required this.entries, this.pagination});
 
   final List<LedgerEntry> entries;
   final PaginationMeta? pagination;

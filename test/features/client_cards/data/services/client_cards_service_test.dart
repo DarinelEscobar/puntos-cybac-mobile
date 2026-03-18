@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:puntos_cybac_mobile/core/network/api_client.dart';
+import 'package:puntos_cybac_mobile/core/services/token_storage_service.dart';
 import 'package:puntos_cybac_mobile/features/client_cards/data/services/client_cards_service.dart';
 
 class MockApiClient implements ApiClient {
@@ -37,73 +38,88 @@ class MockApiClient implements ApiClient {
   void dispose() {}
 }
 
+class FakeTokenStorageService extends TokenStorageService {
+  FakeTokenStorageService(this.token);
+
+  final String? token;
+
+  @override
+  Future<String?> getToken() async => token;
+
+  @override
+  Future<void> saveToken(String token) async {}
+
+  @override
+  Future<void> deleteToken() async {}
+}
+
 void main() {
   late ClientCardsService service;
   late MockApiClient mockApiClient;
+  late FakeTokenStorageService tokenStorage;
 
   setUp(() {
     mockApiClient = MockApiClient();
-    service = ClientCardsService(mockApiClient);
+    tokenStorage = FakeTokenStorageService('test_token');
+    service = ClientCardsService(mockApiClient, tokenStorage);
   });
 
   group('ClientCardsService.getMyCards', () {
     const accessToken = 'test_token';
 
-    test('should return a list of ClientCard when API call is successful', () async {
-      // Arrange
-      mockApiClient.getJsonResponse = {
-        'data': [
-          {
-            'membership_id': 'm1',
-            'company_id': 'c1',
-            'company_name': 'Company 1',
-            'card_uid': 'uid1',
-            'status': 'active',
-            'qr_payload': 'qr1',
-            'points_balance': 100,
-            'branding': {
-              'logo_url': 'logo1',
-              'color_primary': '#000000',
+    test(
+      'should return a list of ClientCard when API call is successful',
+      () async {
+        // Arrange
+        mockApiClient.getJsonResponse = {
+          'data': [
+            {
+              'membership_id': 'm1',
+              'company_id': 'c1',
+              'company_name': 'Company 1',
+              'card_uid': 'uid1',
+              'status': 'active',
+              'qr_payload': 'qr1',
+              'points_balance': 100,
+              'branding': {'logo_url': 'logo1', 'color_primary': '#000000'},
             },
-          },
-          {
-            'membership_id': 'm2',
-            'company_id': 'c2',
-            'company_name': 'Company 2',
-            'card_uid': 'uid2',
-            'status': 'active',
-            'qr_payload': 'qr2',
-            'points_balance': 200,
-            'branding': {},
-          },
-        ],
-      };
+            {
+              'membership_id': 'm2',
+              'company_id': 'c2',
+              'company_name': 'Company 2',
+              'card_uid': 'uid2',
+              'status': 'active',
+              'qr_payload': 'qr2',
+              'points_balance': 200,
+              'branding': {},
+            },
+          ],
+        };
 
-      // Act
-      final result = await service.getMyCards(accessToken: accessToken);
+        // Act
+        final result = await service.getMyCards();
 
-      // Assert
-      expect(mockApiClient.lastPath, '/client/me/cards');
-      expect(mockApiClient.lastBearerToken, accessToken);
-      expect(result.length, 2);
-      expect(result[0].membershipId, 'm1');
-      expect(result[0].pointsBalance, 100);
-      expect(result[1].membershipId, 'm2');
-      expect(result[1].pointsBalance, 200);
-    });
+        // Assert
+        expect(mockApiClient.lastPath, '/client/me/cards');
+        expect(mockApiClient.lastBearerToken, accessToken);
+        expect(result.length, 2);
+        expect(result[0].membershipId, 'm1');
+        expect(result[0].pointsBalance, 100);
+        expect(result[1].membershipId, 'm2');
+        expect(result[1].pointsBalance, 200);
+      },
+    );
 
-    test('should throw ApiClientException when payload data is not a list', () async {
-      // Arrange
-      mockApiClient.getJsonResponse = {
-        'data': 'not a list',
-      };
+    test(
+      'should throw ApiClientException when payload data is not a list',
+      () async {
+        // Arrange
+        mockApiClient.getJsonResponse = {'data': 'not a list'};
 
-      // Act & Assert
-      expect(
-        () => service.getMyCards(accessToken: accessToken),
-        throwsA(isA<ApiClientException>()),
-      );
-    });
+        // Act & Assert
+        expect(() => service.getMyCards(), throwsA(isA<ApiClientException>()));
+      },
+    );
 
     test('should filter out invalid map entries in payload list', () async {
       // Arrange
@@ -125,7 +141,7 @@ void main() {
       };
 
       // Act
-      final result = await service.getMyCards(accessToken: accessToken);
+      final result = await service.getMyCards();
 
       // Assert
       expect(result.length, 1);
@@ -134,12 +150,10 @@ void main() {
 
     test('should return empty list when data is empty list', () async {
       // Arrange
-      mockApiClient.getJsonResponse = {
-        'data': [],
-      };
+      mockApiClient.getJsonResponse = {'data': []};
 
       // Act
-      final result = await service.getMyCards(accessToken: accessToken);
+      final result = await service.getMyCards();
 
       // Assert
       expect(result, isEmpty);

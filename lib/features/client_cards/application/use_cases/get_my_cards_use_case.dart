@@ -6,7 +6,7 @@ class GetMyCardsUseCase {
 
   final ClientCardsService _cardsService;
 
-  Future<List<ClientCard>> call() {
-    return _cardsService.getMyCards();
+  Future<List<ClientCard>> call({bool forceRefresh = false}) {
+    return _cardsService.getMyCards(forceRefresh: forceRefresh);
   }
 }

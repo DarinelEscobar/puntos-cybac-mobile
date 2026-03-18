@@ -1,14 +1,13 @@
 class AppConstants {
   static const String appName = 'CYBAC Puntos';
+  static const String _defaultApiBaseUrl = 'http://10.0.2.2:8000/api/v1';
   static const String _apiBaseUrlFromEnvironment = String.fromEnvironment(
     'API_BASE_URL',
   );
   static String get apiBaseUrl {
     final envValue = _apiBaseUrlFromEnvironment.trim();
-    if (envValue.isEmpty) {
-      return '';
-    }
-    return _normalizeApiBaseUrl(envValue);
+    final selected = envValue.isEmpty ? _defaultApiBaseUrl : envValue;
+    return _normalizeApiBaseUrl(selected);
   }
 
   static String _normalizeApiBaseUrl(String baseUrl) {

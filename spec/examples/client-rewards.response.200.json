@@ -1,0 +1,32 @@
+{
+  "status": "success",
+  "message": "Client rewards fetched.",
+  "data": {
+    "membership_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "rewards": [
+      {
+        "id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+        "company_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "name": "Cafe gratis",
+        "type": "FIXED_REWARD",
+        "points_cost": 80,
+        "is_active": true,
+        "created_at": "2026-02-16T10:20:00Z"
+      },
+      {
+        "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+        "company_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "name": "Descuento 20%",
+        "type": "VOUCHER",
+        "points_cost": 120,
+        "is_active": true,
+        "created_at": "2026-02-15T14:20:00Z"
+      }
+    ]
+  },
+  "meta": {
+    "timestamp": "2026-02-16T10:24:00Z",
+    "path": "api/v1/client/me/rewards?membership_id=ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "version": "v1"
+  }
+}

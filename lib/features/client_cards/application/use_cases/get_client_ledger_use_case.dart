@@ -1,19 +1,15 @@
 import '../../data/services/client_cards_service.dart';
+import '../../domain/models/ledger_entry.dart';
 
 class GetClientLedgerUseCase {
   GetClientLedgerUseCase(this._service);
 
   final ClientCardsService _service;
 
-  Future<LedgerResult> call({
+  Future<List<LedgerEntry>> call({
     required String membershipId,
-    required int page,
-    required int perPage,
+    int limit = 10,
   }) {
-    return _service.getLedger(
-      membershipId: membershipId,
-      page: page,
-      perPage: perPage,
-    );
+    return _service.getLatestLedger(membershipId: membershipId, limit: limit);
   }
 }

@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
-  ApiClient({
-    required this.baseUrl,
-    http.Client? httpClient,
-  }) : _httpClient = httpClient ?? http.Client();
+  ApiClient({required this.baseUrl, http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
 
   final String baseUrl;
   final http.Client _httpClient;
@@ -24,11 +22,7 @@ class ApiClient {
     String path, {
     String? bearerToken,
   }) async {
-    return _send(
-      method: 'GET',
-      path: path,
-      bearerToken: bearerToken,
-    );
+    return _send(method: 'GET', path: path, bearerToken: bearerToken);
   }
 
   Future<Map<String, dynamic>> postJson(
@@ -50,7 +44,13 @@ class ApiClient {
     Map<String, dynamic>? body,
     String? bearerToken,
   }) async {
-    final uri = _uri(path);
+    Uri uri;
+    try {
+      uri = _uri(path);
+    } catch (error) {
+      throw ApiClientException(message: 'Invalid API URL: $error');
+    }
+
     final headers = <String, String>{
       'Accept': 'application/json',
       if (body != null) 'Content-Type': 'application/json',
@@ -69,14 +69,10 @@ class ApiClient {
           body: body != null ? jsonEncode(body) : null,
         );
       } else {
-        throw ApiClientException(
-          message: 'Unsupported HTTP method: $method',
-        );
+        throw ApiClientException(message: 'Unsupported HTTP method: $method');
       }
     } catch (error) {
-      throw ApiClientException(
-        message: 'Network error: $error',
-      );
+      throw ApiClientException(message: 'Network error: $error');
     }
 
     final dynamic payload = _decodePayload(response.bodyBytes);
@@ -117,10 +113,7 @@ class ApiClient {
     }
   }
 
-  String _resolveErrorMessage(
-    Map<String, dynamic> body,
-    int statusCode,
-  ) {
+  String _resolveErrorMessage(Map<String, dynamic> body, int statusCode) {
     final error = body['error'];
     if (error is Map<String, dynamic>) {
       final message = error['message'];

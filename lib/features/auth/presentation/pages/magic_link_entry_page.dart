@@ -77,6 +77,8 @@ class _MagicLinkEntryPageState extends State<MagicLinkEntryPage> {
         return 'Este enlace ya fue usado.';
       case 'MAGIC_LINK_EXPIRED':
         return 'Este enlace expiró. Solicita uno nuevo.';
+      case 'CLIENT_ACCOUNT_DELETED':
+        return 'Esta cuenta ya fue eliminada y no puede iniciar sesión.';
       default:
         final message = error.message.trim();
         final lowerMessage = message.toLowerCase();

@@ -9,9 +9,11 @@ import '../../features/client_cards/application/use_cases/get_client_rewards_use
 import '../../features/client_cards/application/use_cases/get_my_cards_use_case.dart';
 import '../../features/client_cards/data/services/client_cards_service.dart';
 import '../../features/home/application/use_cases/activate_session_from_magic_link_use_case.dart';
+import '../../features/profile/application/use_cases/delete_account_use_case.dart';
 import '../../features/profile/application/use_cases/get_profile_use_case.dart';
 import '../../features/profile/data/repositories/client_repository.dart';
 import '../../integrations/deep_links/deep_link_service.dart';
+import '../../integrations/external_links/external_link_service.dart';
 
 class AppDependencies {
   AppDependencies._({
@@ -20,10 +22,12 @@ class AppDependencies {
     required this.consumeMagicLinkUseCase,
     required this.getMyCardsUseCase,
     required this.getProfileUseCase,
+    required this.deleteAccountUseCase,
     required this.getClientLedgerUseCase,
     required this.getClientRewardsUseCase,
     required this.activateSessionFromMagicLinkUseCase,
     required this.deepLinkService,
+    required this.externalLinkService,
   });
 
   final ApiClient apiClient;
@@ -31,10 +35,12 @@ class AppDependencies {
   final ConsumeMagicLinkUseCase consumeMagicLinkUseCase;
   final GetMyCardsUseCase getMyCardsUseCase;
   final GetProfileUseCase getProfileUseCase;
+  final DeleteAccountUseCase deleteAccountUseCase;
   final GetClientLedgerUseCase getClientLedgerUseCase;
   final GetClientRewardsUseCase getClientRewardsUseCase;
   final ActivateSessionFromMagicLinkUseCase activateSessionFromMagicLinkUseCase;
   final DeepLinkService deepLinkService;
+  final ExternalLinkService externalLinkService;
 
   factory AppDependencies.create() {
     final apiBaseUrl = AppConstants.apiBaseUrl;
@@ -55,6 +61,7 @@ class AppDependencies {
     final consumeMagicLinkUseCase = ConsumeMagicLinkUseCase(authService);
     final getMyCardsUseCase = GetMyCardsUseCase(cardsService);
     final getProfileUseCase = GetProfileUseCase(clientRepo);
+    final deleteAccountUseCase = DeleteAccountUseCase(clientRepo);
     final getClientLedgerUseCase = GetClientLedgerUseCase(cardsService);
     final getClientRewardsUseCase = GetClientRewardsUseCase(cardsService);
 
@@ -64,6 +71,7 @@ class AppDependencies {
       consumeMagicLinkUseCase: consumeMagicLinkUseCase,
       getMyCardsUseCase: getMyCardsUseCase,
       getProfileUseCase: getProfileUseCase,
+      deleteAccountUseCase: deleteAccountUseCase,
       getClientLedgerUseCase: getClientLedgerUseCase,
       getClientRewardsUseCase: getClientRewardsUseCase,
       activateSessionFromMagicLinkUseCase: ActivateSessionFromMagicLinkUseCase(
@@ -71,6 +79,7 @@ class AppDependencies {
         getMyCardsUseCase: getMyCardsUseCase,
       ),
       deepLinkService: AppLinksDeepLinkService(),
+      externalLinkService: UrlLauncherExternalLinkService(),
     );
   }
 

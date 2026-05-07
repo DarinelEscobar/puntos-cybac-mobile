@@ -9,6 +9,7 @@
   - `GET /api/v1/client/me/cards`
   - `GET /api/v1/client/me/rewards`
   - `GET /api/v1/client/me/ledger/latest`
+  - `POST /api/v1/client/me/account-deletion`
 
 ## Flujo recomendado para mobile
 
@@ -17,6 +18,11 @@
 3. La app consume `POST /api/v1/auth/client/magic-links/consume`.
 4. Guardar `access_token` en secure storage.
 5. Consumir endpoints `client/me/*` con bearer token.
+
+Configuraciones mobile relacionadas:
+
+- `TERMS_URL`: URL externa o PDF de términos y condiciones.
+- `ACCOUNT_DELETION_URL`: URL pública fuera de la app para solicitar eliminación de cuenta.
 
 ## Reglas de magic-link
 
@@ -33,3 +39,19 @@ Cuando la API retorne `401 CLIENT_UNAUTHENTICATED`:
 
 1. Limpiar token local.
 2. Redirigir a flujo de magic-link.
+
+## Eliminación de cuenta
+
+- Flujo autenticado: `POST /api/v1/client/me/account-deletion`
+- Request mínimo:
+
+```json
+{
+  "reason": "Ya no deseo mantener mi cuenta activa en la app."
+}
+```
+
+- Al completarse exitosamente:
+  1. La app debe limpiar `access_token`.
+  2. Debe regresar a `MagicLinkEntry`.
+  3. Debe dejar accesible la página pública `ACCOUNT_DELETION_URL` para cumplimiento de Google Play.

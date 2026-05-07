@@ -146,6 +146,51 @@ paths:
         '401':
           $ref: '#/components/responses/ClientUnauthenticated'
 
+  /client/me/account-deletion:
+    post:
+      tags:
+        - Client App
+      summary: Eliminar la cuenta autenticada del cliente
+      operationId: clientDeleteAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientAccountDeletionRequest'
+            example:
+              reason: Ya no deseo mantener mi cuenta activa en la app.
+      responses:
+        '200':
+          description: Cuenta eliminada y acceso revocado.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ClientAccountDeletionResult'
+              example:
+                status: success
+                message: Client account deleted.
+                data:
+                  deleted_at: '2026-05-04T19:30:00Z'
+                  request_status: COMPLETED
+                meta:
+                  timestamp: '2026-05-04T19:30:00Z'
+                  path: api/v1/client/me/account-deletion
+                  version: v1
+        '401':
+          $ref: '#/components/responses/ClientUnauthenticated'
+        '410':
+          $ref: '#/components/responses/ClientAccountDeleted'
+        '422':
+          $ref: '#/components/responses/ClientValidationFailed'
+
   /client/me/cards:
     get:
       tags:
@@ -445,6 +490,31 @@ components:
               details:
                 expired_at: '2026-02-16T08:00:00Z'
 
+    ClientAccountDeleted:
+      description: La cuenta del cliente ya fue eliminada.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: CLIENT_ACCOUNT_DELETED
+              message: Client account was deleted.
+              details: {}
+
+    ClientValidationFailed:
+      description: Error de validación en endpoint cliente.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: VALIDATION_FAILED
+              message: A deletion reason is required.
+              details:
+                reason: required
+
   schemas:
     ApiResponse:
       type: object
@@ -519,6 +589,17 @@ components:
           type: string
           maxLength: 120
           example: flutter-android
+
+    ClientAccountDeletionRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          example: Ya no deseo mantener mi cuenta activa en la app.
 
     ClientIdentity:
       type: object
@@ -769,6 +850,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ClientCard'
+
+    ClientAccountDeletionResult:
+      type: object
+      required:
+        - deleted_at
+        - request_status
+      properties:
+        deleted_at:
+          type: string
+          format: date-time
+        request_status:
+          type: string
+          enum:
+            - COMPLETED
 
     LedgerEntry:
       type: object

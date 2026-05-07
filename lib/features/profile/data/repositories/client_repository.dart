@@ -4,10 +4,7 @@ import '../../domain/models/client_profile.dart';
 import '../../domain/models/membership.dart';
 
 class ClientProfileResult {
-  const ClientProfileResult({
-    required this.profile,
-    required this.memberships,
-  });
+  const ClientProfileResult({required this.profile, required this.memberships});
 
   final ClientProfile profile;
   final List<Membership> memberships;
@@ -36,10 +33,7 @@ class ClientRepository {
 
     final clientIdentity = data['client_identity'];
     if (clientIdentity is! Map<String, dynamic>) {
-      throw ApiClientException(
-        message: 'Invalid client identity',
-        body: data,
-      );
+      throw ApiClientException(message: 'Invalid client identity', body: data);
     }
 
     final profile = ClientProfile.fromJson(clientIdentity);
@@ -50,16 +44,23 @@ class ClientRepository {
       for (final item in membershipsData) {
         if (item is Map<String, dynamic>) {
           final membershipData = item['membership'];
-           if (membershipData is Map<String, dynamic>) {
-              memberships.add(Membership.fromJson(membershipData));
-           }
+          if (membershipData is Map<String, dynamic>) {
+            memberships.add(Membership.fromJson(membershipData));
+          }
         }
       }
     }
 
-    return ClientProfileResult(
-      profile: profile,
-      memberships: memberships,
+    return ClientProfileResult(profile: profile, memberships: memberships);
+  }
+
+  Future<void> deleteAccount({required String reason}) async {
+    final token = await _tokenStorage.getToken();
+
+    await _apiClient.postJson(
+      '/client/me/account-deletion',
+      body: {'reason': reason},
+      bearerToken: token,
     );
   }
 }

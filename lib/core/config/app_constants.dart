@@ -1,13 +1,50 @@
 class AppConstants {
   static const String appName = 'CYBAC Puntos';
-  static const String _defaultApiBaseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String _defaultApiBaseUrl =
+      'https://puntos-cybac.vercel.app/api/v1';
   static const String _apiBaseUrlFromEnvironment = String.fromEnvironment(
     'API_BASE_URL',
   );
+  static const String _termsUrlFromEnvironment = String.fromEnvironment(
+    'TERMS_URL',
+  );
+  static const String _accountDeletionUrlFromEnvironment =
+      String.fromEnvironment('ACCOUNT_DELETION_URL');
   static String get apiBaseUrl {
     final envValue = _apiBaseUrlFromEnvironment.trim();
     final selected = envValue.isEmpty ? _defaultApiBaseUrl : envValue;
     return _normalizeApiBaseUrl(selected);
+  }
+
+  static String get apiOrigin {
+    final parsed = Uri.tryParse(apiBaseUrl);
+    if (parsed == null || parsed.host.trim().isEmpty) {
+      return 'https://puntos-cybac.vercel.app';
+    }
+
+    final origin = StringBuffer()
+      ..write(parsed.scheme.isEmpty ? 'http' : parsed.scheme)
+      ..write('://')
+      ..write(parsed.host);
+
+    if (parsed.hasPort) {
+      origin
+        ..write(':')
+        ..write(parsed.port);
+    }
+
+    return origin.toString();
+  }
+
+  static Uri? get termsUri => _resolveExternalUri(_termsUrlFromEnvironment);
+
+  static Uri? get accountDeletionUri {
+    final configured = _resolveExternalUri(_accountDeletionUrlFromEnvironment);
+    if (configured != null) {
+      return configured;
+    }
+
+    return Uri.tryParse('$apiOrigin/account-deletion');
   }
 
   static String _normalizeApiBaseUrl(String baseUrl) {
@@ -52,6 +89,27 @@ class AppConstants {
     final withHttp = Uri.tryParse('http://$rawValue');
     if (withHttp != null && withHttp.host.trim().isNotEmpty) {
       return withHttp;
+    }
+
+    return null;
+  }
+
+  static Uri? _resolveExternalUri(String rawValue) {
+    final cleaned = _sanitizeBaseUrlInput(rawValue);
+    if (cleaned.isEmpty) {
+      return null;
+    }
+
+    final direct = Uri.tryParse(cleaned);
+    if (direct != null &&
+        direct.scheme.trim().isNotEmpty &&
+        (direct.host.trim().isNotEmpty || direct.scheme == 'file')) {
+      return direct;
+    }
+
+    final withHttps = Uri.tryParse('https://$cleaned');
+    if (withHttps != null && withHttps.host.trim().isNotEmpty) {
+      return withHttps;
     }
 
     return null;

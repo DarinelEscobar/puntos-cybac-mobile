@@ -12,7 +12,7 @@ Incluye:
 - Lista principal de cards con informacion esencial y minima (sin saturacion visual).
 - Detalle de tarjeta con secciones por card: ultimos movimientos y rewards de esa company.
 - Tarjeta reversible (frente/reverso) para mostrar QR en el reverso.
-- Perfil basico de cliente (solo lectura).
+- Perfil basico de cliente con acciones de cuenta.
 - Estados UX: loading, vacio, error, sin conexion, sesion expirada.
 
 No incluye:
@@ -121,10 +121,18 @@ Objetivo: mostrar identidad del cliente autenticado.
 Componentes:
 - Nombre completo, email, telefono.
 - Resumen rapido: total de tarjetas activas.
+- Accion: `Terminos y condiciones` (abre `TERMS_URL` en navegador externo o PDF).
+- Accion: `Eliminar cuenta`.
+  - Confirmacion nativa en app.
+  - Campo `motivo` obligatorio.
+  - Al completar, limpiar sesion local y volver a login.
+- Accion secundaria: `Abrir pagina publica de eliminacion` usando `ACCOUNT_DELETION_URL`.
 - Accion: `Cerrar sesion`.
 
 Estados:
 - `401`: expulsar a login y limpiar almacenamiento seguro.
+- Si falta `TERMS_URL`: mostrar feedback claro de configuracion faltante.
+- Si falla `POST /client/me/account-deletion`: mostrar error y permitir reintento.
 
 ## 4) Reglas visuales y UX
 
@@ -145,7 +153,8 @@ Estados:
 - Accesibilidad:
   - Contraste minimo AA en texto sobre colores de marca.
   - Touch targets >= 44px.
-  - Soporte lector de pantalla en botones clave (`Voltear tarjeta`, `Cerrar sesion`).
+- Soporte lector de pantalla en botones clave (`Voltear tarjeta`, `Cerrar sesion`).
+- Soporte lector de pantalla en `Terminos y condiciones`, `Eliminar cuenta` y `Abrir pagina publica de eliminacion`.
 - Feedback:
   - Error copy corto + accion clara (Retry/Reintentar).
   - Loading visible en llamadas criticas.
@@ -158,6 +167,7 @@ Usar estos endpoints para poblar UI:
 - `GET /api/v1/client/me/cards`
 - `GET /api/v1/client/me/rewards`
 - `GET /api/v1/client/me/ledger/latest`
+- `POST /api/v1/client/me/account-deletion`
 
 Documento de referencia del contrato:
 - `docs/client-api.md`
@@ -232,6 +242,19 @@ UI a mostrar:
 - Orden newest-first.
 - Sin paginacion en mobile.
 
+### 6.6 `POST /api/v1/client/me/account-deletion`
+Request esperado:
+- `reason`
+
+Datos clave de respuesta (`data`):
+- `deleted_at`
+- `request_status`
+
+UI a mostrar:
+- Desde `Profile`, luego de confirmar con motivo obligatorio.
+- En exito: limpiar sesion y volver a `MagicLinkEntry`.
+- Mantener visible una ruta externa `ACCOUNT_DELETION_URL` para el recurso web fuera de la app.
+
 ## 7) Prompt maestro (copiar/pegar)
 
 ```text
@@ -247,6 +270,8 @@ Contexto funcional:
 - Al tocar una tarjeta, se abre detalle con ultimos movimientos de esa tarjeta.
 - La tarjeta del detalle debe poder voltearse (frente/reverso) para mostrar QR en el reverso.
 - Puede ver perfil basico y cerrar sesion.
+- Puede abrir terminos y condiciones desde `Profile`.
+- Puede eliminar su cuenta desde `Profile` y tambien abrir la pagina publica de eliminacion fuera de la app.
 - Redencion en MVP es verbal en caja; no hay flujo de aprobacion en app.
 
 Referencia visual:
@@ -264,6 +289,7 @@ Endpoints disponibles:
 - GET /api/v1/client/me/profile
 - GET /api/v1/client/me/cards
 - GET /api/v1/client/me/ledger/latest
+- POST /api/v1/client/me/account-deletion
 
 Mapeo de datos a UI:
 - cards[]: HomeCards + CardDetail
@@ -285,6 +311,8 @@ Errores a mapear en UI:
 - MAGIC_LINK_EXPIRED
 - CLIENT_UNAUTHENTICATED
 - MEMBERSHIP_NOT_OWNED
+- VALIDATION_FAILED
+- CLIENT_ACCOUNT_DELETED
 
 Entregables esperados:
 - Mapa de navegacion.
@@ -307,4 +335,6 @@ Restriccion:
 - CardDetail permite voltear la tarjeta y ver QR en reverso.
 - El cliente puede mostrar QR e ID manual en caja.
 - Todos los errores definidos tienen mensaje UX y accion.
+- Profile expone `Terminos y condiciones`, `Eliminar cuenta` y `Abrir pagina publica de eliminacion`.
+- El flujo de eliminar cuenta limpia sesion local y regresa a login.
 - El diseno funciona en mobile sin dependencias desktop.

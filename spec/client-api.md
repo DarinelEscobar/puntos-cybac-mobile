@@ -14,6 +14,12 @@ Esta guía resume el contrato cliente para implementar la app móvil Flutter sin
   - `GET /client/me/cards`
   - `GET /client/me/rewards`
   - `GET /client/me/ledger/latest`
+  - `POST /client/me/account-deletion`
+
+Configuración mobile relevante:
+- `API_BASE_URL`
+- `TERMS_URL`
+- `ACCOUNT_DELETION_URL`
 
 ## Autenticación (MVP)
 
@@ -44,6 +50,14 @@ Privado (todos los `GET /client/me/*`):
 
 ```http
 Authorization: Bearer <access_token>
+Accept: application/json
+```
+
+`POST /client/me/account-deletion`:
+
+```http
+Authorization: Bearer <access_token>
+Content-Type: application/json
 Accept: application/json
 ```
 
@@ -265,6 +279,61 @@ Response `200`:
   }
 }
 ```
+
+### 5) Eliminar cuenta autenticada
+
+`POST /client/me/account-deletion`
+
+Request:
+
+```json
+{
+  "reason": "Ya no deseo mantener mi cuenta activa en la app."
+}
+```
+
+Response `200`:
+
+```json
+{
+  "status": "success",
+  "message": "Client account deleted.",
+  "data": {
+    "deleted_at": "2026-05-04T19:30:00Z",
+    "request_status": "COMPLETED"
+  },
+  "meta": {
+    "timestamp": "2026-05-04T19:30:00Z",
+    "path": "api/v1/client/me/account-deletion",
+    "version": "v1"
+  }
+}
+```
+
+Comportamiento esperado en Flutter:
+
+- Mostrar confirmación y motivo obligatorio antes de enviar.
+- Al éxito, limpiar token local y volver al flujo de login.
+- Dejar accesible también una ruta externa en `ACCOUNT_DELETION_URL`.
+
+`422` motivo inválido:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "A deletion reason is required.",
+    "details": {
+      "reason": "required"
+    }
+  }
+}
+```
+
+### Recurso web público
+
+- `ACCOUNT_DELETION_URL` apunta a la página pública fuera de la app para cumplimiento de Google Play.
+- `TERMS_URL` abre PDF o página externa de términos y condiciones desde Perfil.
 
 Si `membership_id` es inválido o no viene:
 

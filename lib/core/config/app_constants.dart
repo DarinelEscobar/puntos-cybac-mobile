@@ -8,8 +8,6 @@ class AppConstants {
   static const String _termsUrlFromEnvironment = String.fromEnvironment(
     'TERMS_URL',
   );
-  static const String _accountDeletionUrlFromEnvironment =
-      String.fromEnvironment('ACCOUNT_DELETION_URL');
   static String get apiBaseUrl {
     final envValue = _apiBaseUrlFromEnvironment.trim();
     final selected = envValue.isEmpty ? _defaultApiBaseUrl : envValue;
@@ -36,15 +34,13 @@ class AppConstants {
     return origin.toString();
   }
 
-  static Uri? get termsUri => _resolveExternalUri(_termsUrlFromEnvironment);
-
-  static Uri? get accountDeletionUri {
-    final configured = _resolveExternalUri(_accountDeletionUrlFromEnvironment);
+  static Uri? get termsUri {
+    final configured = _resolveExternalUri(_termsUrlFromEnvironment);
     if (configured != null) {
       return configured;
     }
 
-    return Uri.tryParse('$apiOrigin/account-deletion');
+    return Uri.tryParse('$apiOrigin/terms');
   }
 
   static String _normalizeApiBaseUrl(String baseUrl) {

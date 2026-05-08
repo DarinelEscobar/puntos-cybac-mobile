@@ -22,7 +22,6 @@
 Configuraciones mobile relacionadas:
 
 - `TERMS_URL`: URL externa o PDF de términos y condiciones.
-- `ACCOUNT_DELETION_URL`: URL pública fuera de la app para solicitar eliminación de cuenta.
 
 ## Reglas de magic-link
 
@@ -54,4 +53,3 @@ Cuando la API retorne `401 CLIENT_UNAUTHENTICATED`:
 - Al completarse exitosamente:
   1. La app debe limpiar `access_token`.
   2. Debe regresar a `MagicLinkEntry`.
-  3. Debe dejar accesible la página pública `ACCOUNT_DELETION_URL` para cumplimiento de Google Play.

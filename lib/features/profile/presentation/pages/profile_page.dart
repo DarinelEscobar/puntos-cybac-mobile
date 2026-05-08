@@ -37,30 +37,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     await widget.dependencies.tokenStorageService.deleteToken();
-    if (!mounted) return;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) =>
-            MagicLinkEntryPage(dependencies: widget.dependencies),
-      ),
-      (route) => false,
-    );
+    await _resetToLogin();
   }
 
   Future<void> _openTermsAndConditions() async {
     await _openExternalUri(
       AppConstants.termsUri,
       missingMessage:
-          'Configura TERMS_URL para abrir los términos y condiciones.',
-    );
-  }
-
-  Future<void> _openPublicAccountDeletionPage() async {
-    await _openExternalUri(
-      AppConstants.accountDeletionUri,
-      missingMessage:
-          'No se pudo resolver la página pública de eliminación de cuenta.',
+          'No se pudo resolver la página pública de términos y condiciones.',
     );
   }
 
@@ -81,7 +65,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _deleteAccount() async {
     final reason = await _promptDeletionReason();
-    if (reason == null) {
+    if (reason == null || _isDeletingAccount) {
+      return;
+    }
+
+    await _settleUiBeforeRouteChange();
+    if (!mounted) {
       return;
     }
 
@@ -89,22 +78,19 @@ class _ProfilePageState extends State<ProfilePage> {
       _isDeletingAccount = true;
     });
 
+    var shouldResetDeletingState = true;
+
     try {
       await widget.dependencies.deleteAccountUseCase(reason: reason);
       await widget.dependencies.tokenStorageService.deleteToken();
 
-      if (!mounted) return;
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) =>
-              MagicLinkEntryPage(dependencies: widget.dependencies),
-        ),
-        (route) => false,
-      );
+      shouldResetDeletingState = false;
+      await _resetToLogin();
     } on ApiClientException catch (error) {
       if (error.statusCode == 401 ||
-          error.errorCode == 'CLIENT_UNAUTHENTICATED') {
+          error.errorCode == 'CLIENT_UNAUTHENTICATED' ||
+          error.errorCode == 'CLIENT_ACCOUNT_DELETED') {
+        shouldResetDeletingState = false;
         await _logout();
         return;
       }
@@ -117,12 +103,33 @@ class _ProfilePageState extends State<ProfilePage> {
         _showSnackBar('Ocurrió un error inesperado al eliminar la cuenta.');
       }
     } finally {
-      if (mounted) {
+      if (mounted && shouldResetDeletingState) {
         setState(() {
           _isDeletingAccount = false;
         });
       }
     }
+  }
+
+  Future<void> _resetToLogin() async {
+    await _settleUiBeforeRouteChange();
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) =>
+            MagicLinkEntryPage(dependencies: widget.dependencies),
+      ),
+      (route) => false,
+    );
+  }
+
+  Future<void> _settleUiBeforeRouteChange() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future<void>.delayed(kThemeAnimationDuration);
+    await WidgetsBinding.instance.endOfFrame;
   }
 
   Future<String?> _promptDeletionReason() async {
@@ -172,6 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       return;
                     }
 
+                    FocusScope.of(dialogContext).unfocus();
                     Navigator.of(dialogContext).pop(reason);
                   },
                   child: const Text('Eliminar cuenta'),
@@ -243,9 +251,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildActionCard(
                   icon: Icons.description_outlined,
                   title: 'Términos y condiciones',
-                  subtitle: AppConstants.termsUri == null
-                      ? 'Abrir PDF o enlace externo cuando TERMS_URL esté configurado.'
-                      : 'Abrir PDF o página externa de términos.',
+                  subtitle:
+                      'Abrir la página pública de términos y condiciones.',
                   onTap: _isDeletingAccount ? null : _openTermsAndConditions,
                 ),
                 const SizedBox(height: 24),
@@ -482,13 +489,6 @@ class _ProfilePageState extends State<ProfilePage> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              OutlinedButton.icon(
-                onPressed: _isDeletingAccount
-                    ? null
-                    : _openPublicAccountDeletionPage,
-                icon: const Icon(Icons.open_in_browser),
-                label: const Text('Abrir página pública'),
-              ),
               OutlinedButton.icon(
                 onPressed: _isDeletingAccount ? null : _deleteAccount,
                 icon: const Icon(Icons.delete_forever, color: Colors.red),

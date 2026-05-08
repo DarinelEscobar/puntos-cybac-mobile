@@ -26,10 +26,9 @@ Quick Flutter guide:
 2. Set:
    - `API_BASE_URL`
    - `TERMS_URL`
-   - `ACCOUNT_DELETION_URL`
 3. Run:
-   - `flutter run --dart-define=API_BASE_URL=... --dart-define=TERMS_URL=... --dart-define=ACCOUNT_DELETION_URL=...`
-   - or `.\run_wireless.ps1` (reads `.env` automatically and passes the three dart defines).
+   - `flutter run --dart-define=API_BASE_URL=... --dart-define=TERMS_URL=...`
+   - or `.\run_wireless.ps1` (reads `.env` automatically and passes the configured dart defines).
 
 ## Client Mobile MVP - Implementation Status
 
@@ -48,7 +47,7 @@ Quick Flutter guide:
    - Features: Flip animation (Front/QR), section switch `Historial | Rewards` by selected card.
 5. **Profile** (`Screen 6`): User profile (Tab 2).
    - Route: `/main` -> Tab 1
-   - Features: User info, active cards count, Terms link, Delete account, public deletion page link, Logout.
+   - Features: User info, active cards count, Terms link, Delete account, Logout.
 
 ### Endpoint Mapping
 - `POST /auth/client/magic-links/consume`: `ConsumeMagicLinkUseCase`
@@ -63,4 +62,4 @@ Quick Flutter guide:
 - "Add Card" feature is mocked with a Snackbar.
 - Branding colors fallback to defaults if parsing fails.
 - `flutter_secure_storage` is used for token persistence.
-- `TERMS_URL` and `ACCOUNT_DELETION_URL` are compile-time configuration entries used from Profile actions.
+- `TERMS_URL` can be overridden at compile time; when omitted, the app resolves the public terms page from the same origin as `API_BASE_URL`.

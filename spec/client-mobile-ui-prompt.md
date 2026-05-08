@@ -126,7 +126,6 @@ Componentes:
   - Confirmacion nativa en app.
   - Campo `motivo` obligatorio.
   - Al completar, limpiar sesion local y volver a login.
-- Accion secundaria: `Abrir pagina publica de eliminacion` usando `ACCOUNT_DELETION_URL`.
 - Accion: `Cerrar sesion`.
 
 Estados:
@@ -253,7 +252,6 @@ Datos clave de respuesta (`data`):
 UI a mostrar:
 - Desde `Profile`, luego de confirmar con motivo obligatorio.
 - En exito: limpiar sesion y volver a `MagicLinkEntry`.
-- Mantener visible una ruta externa `ACCOUNT_DELETION_URL` para el recurso web fuera de la app.
 
 ## 7) Prompt maestro (copiar/pegar)
 

@@ -7,5 +7,12 @@ void main() {
       expect(AppConstants.apiBaseUrl, isNotEmpty);
       expect(AppConstants.apiBaseUrl.endsWith('/api/v1'), isTrue);
     });
+
+    test('termsUri should resolve to the public terms page', () {
+      expect(
+        AppConstants.termsUri?.toString(),
+        'https://puntos-cybac.vercel.app/terms',
+      );
+    });
   });
 }

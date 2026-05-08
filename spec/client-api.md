@@ -19,7 +19,6 @@ Esta guía resume el contrato cliente para implementar la app móvil Flutter sin
 Configuración mobile relevante:
 - `API_BASE_URL`
 - `TERMS_URL`
-- `ACCOUNT_DELETION_URL`
 
 ## Autenticación (MVP)
 
@@ -314,7 +313,6 @@ Comportamiento esperado en Flutter:
 
 - Mostrar confirmación y motivo obligatorio antes de enviar.
 - Al éxito, limpiar token local y volver al flujo de login.
-- Dejar accesible también una ruta externa en `ACCOUNT_DELETION_URL`.
 
 `422` motivo inválido:
 
@@ -330,9 +328,6 @@ Comportamiento esperado en Flutter:
 }
 ```
 
-### Recurso web público
-
-- `ACCOUNT_DELETION_URL` apunta a la página pública fuera de la app para cumplimiento de Google Play.
 - `TERMS_URL` abre PDF o página externa de términos y condiciones desde Perfil.
 
 Si `membership_id` es inválido o no viene:

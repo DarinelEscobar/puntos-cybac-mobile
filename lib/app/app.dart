@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_theme.dart';
+import '../core/ui/widgets/k2.dart';
 import '../core/ui/widgets/debug_build_badge.dart';
 import '../features/home/presentation/pages/session_bootstrap_page.dart';
 import 'di/app_dependencies.dart';
@@ -36,23 +37,23 @@ class _PuntosCybacAppState extends State<PuntosCybacApp> {
       theme: AppTheme.light(),
       builder: (context, child) {
         final content = child ?? const SizedBox.shrink();
-        if (!kDebugMode) {
-          return content;
-        }
+        final appContent = kDebugMode
+            ? Stack(
+                children: [
+                  content,
+                  const Positioned(
+                    top: 0,
+                    right: 0,
+                    child: SafeArea(
+                      minimum: EdgeInsets.only(top: 12, right: 12),
+                      child: DebugBuildBadge(),
+                    ),
+                  ),
+                ],
+              )
+            : content;
 
-        return Stack(
-          children: [
-            content,
-            const Positioned(
-              top: 0,
-              right: 0,
-              child: SafeArea(
-                minimum: EdgeInsets.only(top: 12, right: 12),
-                child: DebugBuildBadge(),
-              ),
-            ),
-          ],
-        );
+        return K2(x: _dependencies.externalLinkService.open, child: appContent);
       },
       home: SessionBootstrapPage(dependencies: _dependencies),
     );

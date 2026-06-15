@@ -2,6 +2,32 @@
 
 App Flutter para la experiencia mobile de clientes de Puntos Cybac.
 
+## Documentation Map
+
+### Mobile handoff
+
+- [Project overview](./docs/project-overview.md)
+- [Scope of delivery](./docs/scope-of-delivery.md)
+- [Deployment guide](./docs/deployment-guide.md)
+- [User manual](./docs/user-manual.md)
+
+### Technical references
+
+- [Architecture guide](./docs/architecture.md)
+- [Build and release guide](./docs/deploy-build.md)
+- [WSL and local Flutter guide](./docs/local-wsl-flutter.md)
+- [Android emulator setup](./docs/emulator-setup.md)
+- [Mobile API spec overview](./spec/README.md)
+- [Client API quick guide](./spec/client-api.md)
+- [OpenAPI contract](./spec/openapi.yaml)
+
+### Companion repository
+
+This app is the mobile client portion of the same MVP delivered with the Laravel backend repository:
+
+- `../puntos-cybac`
+- backend/project docs entry point: [../puntos-cybac/README.md](../puntos-cybac/README.md)
+
 ## Objetivo
 
 Este repositorio contiene la app móvil cliente. No incluye backend, PHP ni base de datos. La integración con backend se consume vía HTTP y su contrato vive en `spec/`.
@@ -88,6 +114,8 @@ Features detectadas actualmente:
 
 - `docs/architecture.md`
   - guía de arquitectura y reglas de modularidad
+- `docs/deploy-build.md`
+  - guía para generar artifacts Android/iOS, prerequisitos y firma para deploy
 - `docs/local-wsl-flutter.md`
   - flujo recomendado para trabajar este repo entre WSL y Windows
 - `docs/emulator-setup.md`

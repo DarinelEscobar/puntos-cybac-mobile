@@ -1,11 +1,11 @@
-# Local WSL Flutter Runbook for `puntos-cybac-mobile`
+# Local WSL Flutter Runbook for `app-frex-v1` (`Puntos Cybac Mobile`)
 
 This project is different from the Laravel repos.
 
 The source code can stay in WSL for fast file access, but the Flutter and Android toolchain may still run from Windows if your SDKs are installed there.
 
-- Linux path: `/home/cybac/projects/puntos-cybac-mobile`
-- Windows view: `\\wsl$\Ubuntu-24.04\home\cybac\projects\puntos-cybac-mobile`
+- Repo name: `app-frex-v1`
+- Windows/WSL path depends on where the repo is checked out.
 
 ## Special rule for this repo
 
@@ -18,13 +18,12 @@ For this Flutter repo, use this split:
 
 This repository already documents Windows-based emulator usage in:
 
-- [emulator-setup.md](/home/cybac/projects/puntos-cybac-mobile/docs/emulator-setup.md)
+- [emulator-setup.md](/docs/emulator-setup.md)
 
 ## Current local notes
 
 - `pubspec.yaml` exists
-- `.env.example` exists
-- `run_wireless.ps1` exists
+- `.env.example` exists as a reference for `--dart-define` values
 - the project uses `API_BASE_URL` and `TERMS_URL` through `--dart-define`
 
 ## Open the project
@@ -33,7 +32,7 @@ This repository already documents Windows-based emulator usage in:
 
 ```bash
 wsl -d Ubuntu-24.04
-cd ~/projects/puntos-cybac-mobile
+cd ~/projects/app-frex-v1
 code .
 ```
 
@@ -42,20 +41,14 @@ code .
 Open this folder:
 
 ```text
-\\wsl$\Ubuntu-24.04\home\cybac\projects\puntos-cybac-mobile
+\\wsl$\Ubuntu-24.04\home\cybac\projects\app-frex-v1
 ```
 
 This option is useful when your Flutter SDK, Android SDK, emulator, and device tooling are all installed on Windows.
 
 ## First-time setup
 
-If this is a fresh copy:
-
-```text
-copy .env.example .env
-```
-
-Then set:
+Use `.env.example` only as a reference. Pass the values explicitly with `--dart-define`:
 
 - `API_BASE_URL`
 - `TERMS_URL`
@@ -65,7 +58,7 @@ Then set:
 Open PowerShell in:
 
 ```text
-\\wsl$\Ubuntu-24.04\home\cybac\projects\puntos-cybac-mobile
+\\wsl$\Ubuntu-24.04\home\cybac\projects\app-frex-v1
 ```
 
 Install packages:
@@ -80,12 +73,6 @@ Run with explicit environment values:
 flutter run --dart-define=API_BASE_URL=https://your-api/api/v1 --dart-define=TERMS_URL=https://your-site/terms
 ```
 
-Or use the helper script that reads `.env`:
-
-```powershell
-.\run_wireless.ps1
-```
-
 ## Emulator and device notes
 
 This repo already assumes a Windows-based Android setup:
@@ -95,7 +82,7 @@ This repo already assumes a Windows-based Android setup:
 
 If you use the documented emulator flow, follow:
 
-- [emulator-setup.md](/home/cybac/projects/puntos-cybac-mobile/docs/emulator-setup.md)
+- [emulator-setup.md](/docs/emulator-setup.md)
 
 ## Useful checks
 
@@ -118,7 +105,7 @@ Check that Windows has:
 
 ### App runs but cannot reach backend
 
-Check `.env` or your `--dart-define` values:
+Check your `--dart-define` values:
 
 - `API_BASE_URL`
 - `TERMS_URL`

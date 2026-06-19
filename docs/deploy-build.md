@@ -23,9 +23,7 @@ This repository does not contain backend deployment, server infrastructure, or s
 flutter pub get
 ```
 
-- local `.env` created from `.env.example` when you want to run helper scripts
-
-Required runtime values:
+Required build/runtime values are passed with `--dart-define`:
 
 - `API_BASE_URL`
 - `TERMS_URL`
@@ -43,7 +41,7 @@ For release builds, `API_BASE_URL` should use `https://`.
 
 These are the main inputs a release build may need outside normal source code:
 
-- `.env` or explicit `--dart-define` values for `API_BASE_URL` and `TERMS_URL`
+- explicit `--dart-define` values for `API_BASE_URL` and `TERMS_URL`
 - Android release keystore file for Play Store builds
 - Android keystore passwords and key alias
 - Apple signing team, certificates, and provisioning access for iOS
@@ -66,10 +64,10 @@ Current Android configuration in this repo:
 
 Relevant files:
 
-- [android/app/build.gradle.kts](/home/cybac/projects/puntos-cybac-mobile/android/app/build.gradle.kts)
-- [android/build.gradle.kts](/home/cybac/projects/puntos-cybac-mobile/android/build.gradle.kts)
-- [android/gradle.properties](/home/cybac/projects/puntos-cybac-mobile/android/gradle.properties)
-- [android/app/src/main/AndroidManifest.xml](/home/cybac/projects/puntos-cybac-mobile/android/app/src/main/AndroidManifest.xml)
+- [android/app/build.gradle.kts](/android/app/build.gradle.kts)
+- [android/build.gradle.kts](/android/build.gradle.kts)
+- [android/gradle.properties](/android/gradle.properties)
+- [android/app/src/main/AndroidManifest.xml](/android/app/src/main/AndroidManifest.xml)
 
 ## iOS requirements
 
@@ -87,9 +85,9 @@ Current iOS configuration in this repo:
 
 Relevant files:
 
-- [ios/Runner.xcodeproj/project.pbxproj](/home/cybac/projects/puntos-cybac-mobile/ios/Runner.xcodeproj/project.pbxproj)
-- [ios/Runner/Info.plist](/home/cybac/projects/puntos-cybac-mobile/ios/Runner/Info.plist)
-- [ios/Flutter/Release.xcconfig](/home/cybac/projects/puntos-cybac-mobile/ios/Flutter/Release.xcconfig)
+- [ios/Runner.xcodeproj/project.pbxproj](/ios/Runner.xcodeproj/project.pbxproj)
+- [ios/Runner/Info.plist](/ios/Runner/Info.plist)
+- [ios/Flutter/Release.xcconfig](/ios/Flutter/Release.xcconfig)
 
 ## Pre-build checks
 
@@ -238,7 +236,7 @@ Before handing a build to QA or publishing:
 
 Current project version source:
 
-- [pubspec.yaml](/home/cybac/projects/puntos-cybac-mobile/pubspec.yaml)
+- [pubspec.yaml](/pubspec.yaml)
 
 Current value:
 
@@ -256,12 +254,11 @@ flutter build appbundle --release \
 
 The same `--build-name` and `--build-number` pattern applies to iOS builds.
 
-## Local helper scripts and related docs
+## Related docs
 
-- [README.md](/home/cybac/projects/puntos-cybac-mobile/README.md)
-- [docs/local-wsl-flutter.md](/home/cybac/projects/puntos-cybac-mobile/docs/local-wsl-flutter.md)
-- [docs/emulator-setup.md](/home/cybac/projects/puntos-cybac-mobile/docs/emulator-setup.md)
-- [run_wireless.ps1](/home/cybac/projects/puntos-cybac-mobile/run_wireless.ps1)
+- [README.md](/README.md)
+- [docs/local-wsl-flutter.md](/docs/local-wsl-flutter.md)
+- [docs/emulator-setup.md](/docs/emulator-setup.md)
 
 ## Current gaps to resolve before store deployment
 

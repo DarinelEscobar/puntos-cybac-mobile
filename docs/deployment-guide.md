@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This guide explains how to prepare, configure, build, and deliver the Flutter mobile app for the Puntos Cybac MVP.
+This guide explains how to prepare, configure, build, and deliver `app-frex-v1` (`Puntos Cybac Mobile`).
 
-For backend/server deployment, use the companion repository `../puntos-cybac`.
+For backend/server deployment, use `web-frex-v1` (`Puntos Cybac Web`).
 
 ## Requirements
 
@@ -19,10 +19,12 @@ Platform-specific requirements:
 
 ## Environment configuration
 
-1. Copy `.env.example` to `.env`.
-2. Define:
-   - `API_BASE_URL`
-   - `TERMS_URL`
+The app reads environment values through `--dart-define`. `.env.example` is only a reference for the expected values; the app does not load `.env` directly.
+
+Define these values when running or building:
+
+- `API_BASE_URL`
+- `TERMS_URL`
 
 Example:
 
@@ -34,7 +36,7 @@ TERMS_URL=https://your-backend.example/terms
 Important:
 
 - release builds should use `https://`
-- the API base URL must point to the backend app in `../puntos-cybac`
+- the API base URL must point to `web-frex-v1` (`Puntos Cybac Web`)
 
 ## Install dependencies
 
@@ -48,12 +50,6 @@ Manual example:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=https://your-backend.example/api/v1 --dart-define=TERMS_URL=https://your-backend.example/terms
-```
-
-Windows PowerShell helper:
-
-```powershell
-.\run_wireless.ps1
 ```
 
 ## Validation commands
@@ -90,7 +86,7 @@ flutter build ipa --release --dart-define=API_BASE_URL=https://your-backend.exam
 - the app launches successfully
 - deep links are configured and open the app
 - magic-link authentication works against the target backend
-- cards, profile, rewards, and ledger load correctly
+- cards, profile, card detail rewards, and ledger load correctly
 - logout/session recovery behaves as expected
 - terms link opens the correct environment URL
 
@@ -100,4 +96,4 @@ flutter build ipa --release --dart-define=API_BASE_URL=https://your-backend.exam
 - [Scope of delivery](./scope-of-delivery.md)
 - [User manual](./user-manual.md)
 - [Build and release guide](./deploy-build.md)
-- [Backend deployment guide](../../puntos-cybac/docs/deployment-guide.md)
+- Backend deployment guide: `/docs/deployment-guide.md` in `web-frex-v1`

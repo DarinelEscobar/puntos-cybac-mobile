@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This manual explains the client-facing mobile flows included in the Puntos Cybac MVP.
+This manual explains the client-facing mobile flows included in `app-frex-v1` (`Puntos Cybac Mobile`).
 
-This app is for loyalty program clients only. Company admins and staff use the web platform in `../puntos-cybac`.
+This app is for loyalty program clients only. Company admins and staff use `web-frex-v1` (`Puntos Cybac Web`).
 
 ## Access flow
 
@@ -30,9 +30,10 @@ This app is for loyalty program clients only. Company admins and staff use the w
 - shows one or more client loyalty cards
 - exposes QR/card data for identification at store level
 
-### Rewards
+### Card detail rewards
 
-- shows the rewards catalog returned by the backend
+- shows the rewards catalog returned by the backend for the selected card/company
+- lives inside the card detail view next to ledger/history
 
 ### Profile
 
@@ -57,7 +58,7 @@ This app is for loyalty program clients only. Company admins and staff use the w
 - open the app
 - review current card and points status
 - present QR/card at the business when needed
-- review rewards and history
+- review card detail rewards and history
 
 ### 3. Account deletion request
 
@@ -78,4 +79,4 @@ This app is for loyalty program clients only. Company admins and staff use the w
 - [Scope of delivery](./scope-of-delivery.md)
 - [Deployment guide](./deployment-guide.md)
 - [Client API quick guide](../spec/client-api.md)
-- [Backend companion repo](../../puntos-cybac/README.md)
+- Backend companion repo: `/README.md` in `web-frex-v1`

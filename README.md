@@ -1,6 +1,6 @@
-# puntos_cybac_mobile
+# app-frex-v1 (`Puntos Cybac Mobile`)
 
-App Flutter para la experiencia mobile de clientes de Puntos Cybac.
+App Flutter para la experiencia mobile de clientes de `Puntos Cybac Mobile`.
 
 ## Documentation Map
 
@@ -25,8 +25,8 @@ App Flutter para la experiencia mobile de clientes de Puntos Cybac.
 
 This app is the mobile client portion of the same MVP delivered with the Laravel backend repository:
 
-- `../puntos-cybac`
-- backend/project docs entry point: [../puntos-cybac/README.md](../puntos-cybac/README.md)
+- `web-frex-v1` (`Puntos Cybac Web`)
+- backend/project docs entry point: `/README.md` in `web-frex-v1`
 
 ## Objetivo
 
@@ -82,9 +82,8 @@ Si necesitas eso, debe documentarse en el repositorio del backend. Aquí solo se
 ├── windows/        # runner Windows
 ├── linux/          # runner Linux
 ├── macos/          # runner macOS
-├── .env.example    # ejemplo de variables locales
-├── pubspec.yaml    # dependencias y constraints
-└── run_wireless.ps1 # helper de ejecución por PowerShell
+├── .env.example    # referencia de valores para --dart-define
+└── pubspec.yaml    # dependencias y constraints
 ```
 
 ## Estructura de `lib/`
@@ -142,10 +141,12 @@ Fuente de verdad del contrato API para mobile:
 
 ## Variables de entorno
 
-1. Copia `.env.example` a `.env`.
-2. Configura:
-   - `API_BASE_URL`
-   - `TERMS_URL`
+La app lee valores de compilacion con `--dart-define`. `.env.example` queda solo como referencia de los nombres y valores esperados; la app no carga `.env` por si sola.
+
+Configura estos valores al correr o compilar:
+
+- `API_BASE_URL`
+- `TERMS_URL`
 
 Valores ejemplo actuales:
 
@@ -177,23 +178,9 @@ flutter pub get
 
 ## Cómo correr la app
 
-### Opción 1: ejecución manual
-
 ```bash
 flutter run --dart-define=API_BASE_URL=https://tu-api/api/v1 --dart-define=TERMS_URL=https://tu-sitio/terms
 ```
-
-### Opción 2: helper PowerShell
-
-```powershell
-.\run_wireless.ps1
-```
-
-Ese script:
-
-- lee `.env`
-- conecta un dispositivo Android por ADB
-- pasa `API_BASE_URL` y `TERMS_URL` como `--dart-define`
 
 ## Requisitos básicos para desarrollo
 
@@ -302,6 +289,8 @@ Pantallas principales documentadas/implementadas:
 4. `CardDetail`
 5. `Profile`
 
+Nota: `Rewards` no es una pantalla principal independiente. Se consulta dentro de `CardDetail`, junto con historial/movimientos de la tarjeta seleccionada.
+
 Supuestos y gaps conocidos:
 
 - el QR se genera localmente con `qr_flutter`
@@ -327,8 +316,8 @@ Si habrá release móvil, además valida:
 
 ## Referencias rápidas
 
-- Arquitectura: [docs/architecture.md](/home/cybac/projects/puntos-cybac-mobile/docs/architecture.md)
-- WSL/Windows: [docs/local-wsl-flutter.md](/home/cybac/projects/puntos-cybac-mobile/docs/local-wsl-flutter.md)
-- Emulador Android: [docs/emulator-setup.md](/home/cybac/projects/puntos-cybac-mobile/docs/emulator-setup.md)
-- Spec mobile: [spec/README.md](/home/cybac/projects/puntos-cybac-mobile/spec/README.md)
-- OpenAPI: [spec/openapi.yaml](/home/cybac/projects/puntos-cybac-mobile/spec/openapi.yaml)
+- Arquitectura: [docs/architecture.md](/docs/architecture.md)
+- WSL/Windows: [docs/local-wsl-flutter.md](/docs/local-wsl-flutter.md)
+- Emulador Android: [docs/emulator-setup.md](/docs/emulator-setup.md)
+- Spec mobile: [spec/README.md](/spec/README.md)
+- OpenAPI: [spec/openapi.yaml](/spec/openapi.yaml)

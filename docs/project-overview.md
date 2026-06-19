@@ -2,9 +2,9 @@
 
 ## Purpose
 
-`puntos-cybac-mobile` is the Flutter mobile client for the Puntos Cybac MVP.
+`app-frex-v1` (`Puntos Cybac Mobile`) is the Flutter mobile client for the MVP.
 
-This repository covers the end-user mobile experience for loyalty program clients. It is the companion application to the Laravel backend and admin platform in `../puntos-cybac`.
+This repository covers the end-user mobile experience for loyalty program clients. It is the companion application to `web-frex-v1` (`Puntos Cybac Web`).
 
 ## What this app does
 
@@ -16,18 +16,18 @@ The mobile app allows a registered client to:
 - view one or more digital loyalty cards
 - display QR/card information for in-store identification
 - review points ledger history
-- review available rewards
+- review available rewards inside each card detail
 - request account deletion through the API flow
 
 ## Relationship to the MVP
 
 The full MVP is split across two repositories:
 
-- `../puntos-cybac`
+- `web-frex-v1` (`Puntos Cybac Web`)
   - Laravel backend
   - admin/company web UI
   - database, business rules, and API
-- `../puntos-cybac-mobile`
+- `app-frex-v1` (`Puntos Cybac Mobile`)
   - Flutter mobile app for loyalty clients
 
 This repo does not contain:
@@ -62,7 +62,7 @@ The current app structure is feature-first and includes:
 - `home`
 - `client_cards`
 - `profile`
-- `rewards`
+- `rewards` support inside card detail
 
 ## Related documents
 
@@ -71,4 +71,4 @@ The current app structure is feature-first and includes:
 - [User manual](./user-manual.md)
 - [Architecture guide](./architecture.md)
 - [Mobile API spec overview](../spec/README.md)
-- [Backend companion repo](../../puntos-cybac/README.md)
+- Backend companion repo: `/README.md` in `web-frex-v1`

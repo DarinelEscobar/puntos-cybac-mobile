@@ -72,7 +72,7 @@ Debe aparecer un dispositivo Android con un nombre similar a `Pixel_7_API_34` (p
 Desde la raíz del proyecto (en la misma terminal donde corriste `flutter devices`):
 
 ```powershell
-cd C:\laragon\www\puntos_cybac_mobile
+cd C:\laragon\www\app-frex-v1
 flutter pub get
 flutter clean
 flutter run -d emulator-5554
